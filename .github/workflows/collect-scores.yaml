@@ -1,0 +1,62 @@
+name: Collect Scores
+
+# Teacher-triggered workflow. Iterates the (student, assignment)
+# Cartesian product from <classroom>/students.csv ×
+# <classroom>/assignments.json, asks GitHub for each expected
+# `<classroom>-<assignment>-<username>` repo's latest release, and
+# downloads `result.json` from it. Single-writer by design — no
+# concurrent ingest, no per-student dispatch event, no broad
+# cross-repo write secret.
+
+on:
+  workflow_dispatch:
+    inputs:
+      classroom:
+        description: "Classroom short-name (leave blank to collect all)"
+        required: false
+  schedule:
+    # Nightly autopilot. Comment out the next line if you only want
+    # manual triggers.
+    - cron: "17 4 * * *"
+
+permissions:
+  contents: write       # write scores.json + commit
+
+concurrency:
+  group: collect-${{ github.event.inputs.classroom || 'all' }}
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Collect scores
+        env:
+          # Read-only PAT scoped to `Contents: read` on
+          # <classroom>-* student repos. Required for the
+          # per-repo `releases/latest` + `result.json` asset
+          # downloads. Rotated via
+          # `gh teacher rotate-collect-token <org>`.
+          CLASSROOM50_COLLECT_TOKEN: ${{ secrets.CLASSROOM50_COLLECT_TOKEN }}
+          # Optional restriction to a single classroom; empty
+          # means "collect all classrooms in this config repo".
+          CLASSROOM_FILTER: ${{ github.event.inputs.classroom || '' }}
+        run: python3 .github/scripts/collect_scores.py
+
+      - name: Commit and push
+        run: |
+          set -euo pipefail
+          if [ -n "$(git status --porcelain '*/scores.json' 2>/dev/null)" ]; then
+            git add '*/scores.json'
+            git -c user.name=classroom50-bot -c user.email=bot@classroom50 \
+                commit -m "collect: refresh scores.json"
+            git push
+          else
+            echo "no scores.json changes to commit"
+          fi
