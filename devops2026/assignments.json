@@ -1,4 +1,24 @@
 {
   "schema": "classroom50/assignments/v1",
-  "assignments": []
+  "assignments": [
+    {
+      "slug": "devops-gruppe",
+      "name": "Devops-Gruppe",
+      "template": {
+        "owner": "tbzdevops",
+        "repo": "",
+        "branch": "main"
+      },
+      "mode": "group",
+      "autograder": "default",
+      "due": "2026-06-17T21:59:00Z",
+      "due_meta": {
+        "input": "2026-06-17T23:59:00",
+        "zone": "Europe/Zurich",
+        "offset": "+02:00",
+        "source": "auto-detected"
+      },
+      "max_group_size": 2
+    }
+  ]
 }
