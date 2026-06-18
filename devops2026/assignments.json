@@ -19,6 +19,24 @@
         "source": "auto-detected"
       },
       "max_group_size": 2
+    },
+    {
+      "slug": "assignment1",
+      "name": "Assignment1",
+      "template": {
+        "owner": "tbzdevops",
+        "repo": "https://github.com/tbzdevops/tbzdevops-projekt-techstyle-startercode",
+        "branch": "main"
+      },
+      "mode": "individual",
+      "autograder": "default",
+      "due": "2026-08-01T21:59:00Z",
+      "due_meta": {
+        "input": "2026-08-01T23:59:00",
+        "zone": "Europe/Zurich",
+        "offset": "+02:00",
+        "source": "auto-detected"
+      }
     }
   ]
 }
