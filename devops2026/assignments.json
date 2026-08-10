@@ -37,6 +37,13 @@
         "offset": "+02:00",
         "source": "auto-detected"
       }
+    },
+    {
+      "slug": "day01",
+      "name": "day01",
+      "mode": "individual",
+      "autograder": "default",
+      "feedback_pr": true
     }
   ]
 }
