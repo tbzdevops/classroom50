@@ -49,17 +49,7 @@
         "offset": "+02:00",
         "source": "auto-detected"
       },
-      "max_group_size": 2,
-      "tests": [
-        {
-          "name": "test",
-          "type": "io",
-          "run": "test",
-          "points": 10,
-          "comparison": "included",
-          "expected": "test"
-        }
-      ]
+      "max_group_size": 2
     }
   ]
 }
