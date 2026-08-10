@@ -12,7 +12,17 @@
         "repo": "techstyle",
         "branch": "day1_solution"
       },
-      "max_group_size": 2
+      "max_group_size": 2,
+      "tests": [
+        {
+          "name": "print hello workd",
+          "type": "io",
+          "run": "print(\"hello\"",
+          "points": 10,
+          "comparison": "included",
+          "expected": "hello"
+        }
+      ]
     }
   ]
 }
