@@ -1,0 +1,25 @@
+{
+  "schema": "classroom50/classroom/v1",
+  "name": "ITCNE25",
+  "short_name": "itcne25",
+  "term": "",
+  "org": "tbzdevops",
+  "team": {
+    "id": 18921114,
+    "slug": "classroom50-itcne25"
+  },
+  "teams": {
+    "teacher": {
+      "id": 18921115,
+      "slug": "classroom50-itcne25-teacher"
+    },
+    "hta": {
+      "id": 18921116,
+      "slug": "classroom50-itcne25-hta"
+    },
+    "ta": {
+      "id": 18921117,
+      "slug": "classroom50-itcne25-ta"
+    }
+  }
+}
