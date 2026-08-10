@@ -1,4 +1,18 @@
 {
   "schema": "classroom50/assignments/v1",
-  "assignments": []
+  "assignments": [
+    {
+      "slug": "day01",
+      "name": "Day01",
+      "mode": "group",
+      "autograder": "default",
+      "feedback_pr": true,
+      "template": {
+        "owner": "tbzdevops",
+        "repo": "techstyle",
+        "branch": "day1_solution"
+      },
+      "max_group_size": 2
+    }
+  ]
 }
