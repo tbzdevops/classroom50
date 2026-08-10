@@ -20,6 +20,10 @@ on:
 permissions:
   contents: write
   statuses: write
+  # pull-requests: write powers the opt-in Feedback PR. The
+  # calling shim must grant the same scope — a reusable workflow's
+  # effective token is the intersection with the caller's permissions.
+  pull-requests: write
 
 # cancel-in-progress: false — every push gets its own release.
 # The set-latest job (further down) serializes the latest-pointer
@@ -33,6 +37,9 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     outputs:
+      # 'true' -> pushed commit is the acceptance commit; skip the tag/read
+      # steps and the grade job (no submission tag, no release).
+      is-acceptance:  ${{ steps.acceptance.outputs.is-acceptance }}
       submission-tag: ${{ steps.read.outputs.submission-tag }}
       runs-on:        ${{ steps.read.outputs.runs-on }}
       container:      ${{ steps.read.outputs.container }}
@@ -40,22 +47,95 @@ jobs:
       node:           ${{ steps.read.outputs.node }}
       java:           ${{ steps.read.outputs.java }}
       go:             ${{ steps.read.outputs.go }}
+      rust:           ${{ steps.read.outputs.rust }}
       apt:            ${{ steps.read.outputs.apt }}
       base-url:       ${{ steps.read.outputs.base-url }}
       classroom:      ${{ steps.read.outputs.classroom }}
       assignment:     ${{ steps.read.outputs.assignment }}
+      secret:         ${{ steps.read.outputs.secret }}
+      feedback-pr:    ${{ steps.read.outputs.feedback-pr }}
+      mode:           ${{ steps.read.outputs.mode }}
+      allowed-files:  ${{ steps.read.outputs.allowed-files }}
+      release-assets: ${{ steps.read.outputs.release-assets }}
+      # 'true' -> no autograder configured (no declarative tests, no
+      # per-assignment bundle, no classroom-default autograder.py), so grade +
+      # set-latest skip. Fails OPEN: any probe error emits 'false' and grades.
+      no-autograder:  ${{ steps.read.outputs.no-autograder }}
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
+      - name: Check out repository
+        uses: actions/checkout@v7
         with:
-          python-version: "3.12"
-      - run: python3 -m pip install --quiet --user pyyaml
+          # Full history -- the acceptance check walks back to the commit
+          # that added .classroom50.yaml; a shallow clone hides it.
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+      - name: Install PyYAML
+        run: python3 -m pip install --quiet --user pyyaml
+        working-directory: ${{ runner.temp }}
+
+      # === Skip the acceptance commit ===
+      # The accept commit (adds .classroom50.yaml + the shim, student-
+      # authored, so it fires this workflow) has nothing to grade. Detect
+      # it via the Pages-fetched runner.py and skip the tag/read steps and
+      # grade job. Branch trigger only (a tag push is always a submission).
+      # Fails open (grades) on a fetch failure.
+      - name: Detect acceptance commit
+        id: acceptance
+        if: github.ref_type == 'branch'
+        env:
+          REPO_OWNER: ${{ github.repository_owner }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          BASE_URL="https://${REPO_OWNER}.github.io/classroom50"
+          RUNNER_SCRIPT="${RUNNER_TEMP:-/tmp}/classroom50-runner.py"
+          if curl -fsSL --max-time 30 --retry 3 --retry-delay 2 --retry-all-errors \
+               "${BASE_URL}/runner.py" -o "$RUNNER_SCRIPT"; then
+            # Fail open on a fetched-but-unrunnable runner.py too (invalid
+            # 200 body, syntax error, missing python3): a non-zero detect
+            # exit must grade, not fail the setup job and drop a real
+            # submission. detect_acceptance_mode already exits 0 for every
+            # in-process outcome; this guards the can't-execute case.
+            python3 "$RUNNER_SCRIPT" --detect-acceptance || {
+              echo "::warning::acceptance detection errored; grading proceeds"
+              echo "is-acceptance=false" >> "$GITHUB_OUTPUT"
+            }
+          else
+            echo "::warning::could not fetch runner.py for acceptance check; grading proceeds"
+            echo "is-acceptance=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # === Acceptance-skip commit status ===
+      # A graded run posts a classroom50/autograde commit status (the
+      # grade job's `always()` step); an acceptance skip otherwise posts
+      # nothing, so a client polling the commit-status API can't tell
+      # "skipped because acceptance" from "hasn't run yet". Post an
+      # explicit success status here to keep that polling channel at
+      # parity with the human's check mark (mirrors the Feedback PR
+      # status fallback). Best-effort: never fail the job over it.
+      - name: Acceptance-skip commit status
+        if: steps.acceptance.outputs.is-acceptance == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          gh api "repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
+            -f state="success" \
+            -f context="classroom50/autograde" \
+            -f description="acceptance commit — nothing to grade yet; run gh student submit" \
+            -f target_url="$RUN_URL" >/dev/null 2>&1 || true
 
       # === Tag the submission ===
       # Branch trigger: create submit/<UTC-timestamp>-<short-sha> at
       # the pushed SHA. Tag trigger: reuse the pushed tag. Tags pushed
       # with github.token don't fire workflows (anti-recursion).
-      - id: tag
+      - name: Tag submission
+        id: tag
+        if: steps.acceptance.outputs.is-acceptance != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           REF: ${{ github.ref }}
@@ -75,7 +155,7 @@ jobs:
           # (workflow re-run of the same commit), reuse it instead of
           # racing on a fresh timestamp. `--refs` filters out the
           # `refs/tags/X^{}` peeled-ref rows that annotated tags emit
-          # — without it, awk could capture e.g. `submit/foo^{}` and
+          # — without it, awk could capture e.g., `submit/foo^{}` and
           # produce an invalid pseudo-tag.
           EXISTING=$(git ls-remote --refs --tags origin \
                        | awk -v sha="$SHA" '$1 == sha && $2 ~ /^refs\/tags\/submit\// { sub("refs/tags/", "", $2); print $2; exit }')
@@ -99,7 +179,9 @@ jobs:
       # an attacker-hosted Pages site. Allow-lists mirror
       # cli/gh-teacher/runtime.go (runtime block) and
       # cli/gh-teacher/tests.go (declarative tests block).
-      - id: read
+      - name: Read assignment config
+        id: read
+        if: steps.acceptance.outputs.is-acceptance != 'true'
         env:
           SUBMISSION_TAG: ${{ steps.tag.outputs.tag }}
           REPO_OWNER: ${{ github.repository_owner }}
@@ -110,16 +192,12 @@ jobs:
           import yaml
 
           _SLUG = re.compile(r"^[a-z0-9][a-z0-9-]{1,38}$")
+          _SECRET = re.compile(r"^[a-z0-9]{4,64}$")
           _LANG = re.compile(r"^[A-Za-z0-9._+-]{1,32}$")
           _APT  = re.compile(r"^[a-z0-9][a-z0-9.+-]{0,63}$")
           _IMAGE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/@+-]{0,255}$")
-          _SECRET_REF = re.compile(r"^\$\{\{\s*secrets\.[A-Za-z_][A-Za-z0-9_]*\s*\}\}$")
           _USER = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9_.-]{0,31}(?::[A-Za-z0-9_][A-Za-z0-9_.-]{0,31})?$")
-          _ALLOWED_RUNS_ON = {
-              "ubuntu-latest", "ubuntu-24.04", "ubuntu-22.04", "ubuntu-20.04",
-              "macos-latest", "macos-14", "macos-13",
-              "windows-latest", "windows-2022", "windows-2019",
-          }
+          _RUNS_ON_LABEL = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
           _DEFAULT_RUNS_ON = "ubuntu-latest"
 
           def fail(msg):
@@ -148,6 +226,13 @@ jobs:
           classroom  = safe((cfg.get("classroom") or "").strip(),  "classroom",  _SLUG)
           assignment = safe((cfg.get("assignment") or "").strip(), "assignment", _SLUG)
 
+          # Optional capability-URL secret. Present -> resources at
+          # <classroom>/<secret>/; absent -> plain path. Validated against the
+          # same strict regex as the other fields since it composes into a URL.
+          secret = (cfg.get("secret") or "").strip()
+          if secret and not _SECRET.match(secret):
+              fail(f".classroom50.yaml field 'secret' has invalid value {secret!r} (must match {_SECRET.pattern!r}) — re-run `gh student accept`")
+
           owner = os.environ["REPO_OWNER"]
           base_url = f"https://{owner}.github.io/classroom50"
 
@@ -165,12 +250,20 @@ jobs:
                           time.sleep(2 ** attempt); continue
                       raise
 
-          manifest_url = f"{base_url}/{classroom}/assignments.json"
+          # Secret-aware classroom path segment, mirroring runner.py's
+          # _classroom_segment and publish-pages.yaml's dest_prefix. Defined
+          # locally because this setup step runs before runner.py is fetched;
+          # keep it byte-identical to those copies (pinned by
+          # cli/shared/contract/contract_test.go).
+          def classroom_segment(classroom, secret):
+              return f"{classroom}/{secret}" if secret else classroom
+
+          manifest_url = f"{base_url}/{classroom_segment(classroom, secret)}/assignments.json"
           try:
               with get(manifest_url) as resp:
                   manifest = json.load(resp)
           except urllib.error.HTTPError as exc:
-              fail(f"GET {manifest_url}: HTTP {exc.code} — ask your instructor to confirm publish-pages.yaml has run")
+              fail(f"GET {manifest_url}: HTTP {exc.code} — ask your teacher to confirm publish-pages.yaml has run")
           except urllib.error.URLError as exc:
               fail(f"GET {manifest_url}: {exc.reason} — the Pages site may not be deployed yet")
 
@@ -182,7 +275,16 @@ jobs:
               None,
           )
           if entry is None:
-              fail(f"assignment {assignment!r} not registered in {manifest_url} — ask your instructor to run `gh teacher assignment add`")
+              fail(f"assignment {assignment!r} not registered in {manifest_url} — ask your teacher to run `gh teacher assignment add`")
+
+          # empty_repo assignments never autograde — same predicate as
+          # collect_scores.py / regrade_repos.py (is_empty_repo: strictly the
+          # boolean true, matching Go's bool decode and TS's === true),
+          # enforced here too because student repos are student-writable: a
+          # hand-added workflow calling this runner must not re-enter the
+          # grading pipeline (releases, submit tags) that collection skips.
+          if entry.get("empty_repo") is True:
+              fail(f"assignment {assignment!r} is an empty-repository assignment — autograding is disabled for it")
 
           # === Re-validate the declarative tests block ===
           # Mirrors cli/gh-teacher/tests.go (write-time validator) so a
@@ -263,30 +365,58 @@ jobs:
           if not isinstance(runtime, dict):
               fail(f"entry {assignment!r} has malformed runtime block")
 
-          # Allow-list mirrors Go's runtimeRef + DisallowUnknownFields.
-          # A hand-edited assignments.json with extra keys (e.g. an
+          # Allow-list mirrors Go's RuntimeRef + DisallowUnknownFields.
+          # A hand-edited assignments.json with extra keys (e.g., an
           # `options:` smuggled at runtime level) would otherwise pass
           # this validator silently while the CLI rejects it at write.
-          _RUNTIME_KEYS = {"runs-on", "container", "python", "node", "java", "go", "apt"}
+          _RUNTIME_KEYS = {"runs-on", "container", "python", "node", "java", "go", "rust", "apt"}
           extras = set(runtime) - _RUNTIME_KEYS
           if extras:
               fail(f"runtime has unsupported keys: {sorted(extras)}")
 
           container = runtime.get("container")
-          runs_on   = runtime.get("runs-on")  or ""
+          raw_runs_on = runtime.get("runs-on")
           python    = runtime.get("python")   or ""
           node      = runtime.get("node")     or ""
           java      = runtime.get("java")     or ""
           go        = runtime.get("go")       or ""
+          rust      = runtime.get("rust")     or ""
           apt       = runtime.get("apt")      or []
+
+          # runs-on mirrors GitHub Actions: a single label or an array
+          # (["self-hosted", "gpu"]), normalized to a list. No value
+          # allow-list (mirror Go's ValidateRunsOn) — only injection-
+          # checked. The degenerate "" and [] forms are rejected (mirror
+          # Go's UnmarshalJSON + the schema) so only an OMITTED runs-on
+          # means "use the default".
+          if raw_runs_on is None:
+              runs_on_labels = []
+          elif isinstance(raw_runs_on, str):
+              if raw_runs_on == "":
+                  fail("runtime.runs-on must not be an empty string; omit the field to use the default (ubuntu-latest)")
+              runs_on_labels = [raw_runs_on]
+          elif isinstance(raw_runs_on, list):
+              if not raw_runs_on:
+                  fail("runtime.runs-on must not be an empty array; omit the field to use the default (ubuntu-latest)")
+              runs_on_labels = raw_runs_on
+          else:
+              fail(f"runtime.runs-on must be a label string or an array of label strings, got {raw_runs_on!r}")
+          if len(runs_on_labels) > 10:
+              fail(f"runtime.runs-on has {len(runs_on_labels)} labels (max 10)")
+          for i, lbl in enumerate(runs_on_labels):
+              if not isinstance(lbl, str) or not _RUNS_ON_LABEL.match(lbl):
+                  fail(f"runtime.runs-on[{i}] {lbl!r} must match {_RUNS_ON_LABEL.pattern}")
 
           if container is not None:
               if not isinstance(container, dict):
                   fail("runtime.container must be an object")
               # Same allow-list discipline at the container level —
               # closes the "smuggle --privileged via container.options"
-              # vector. Mirror Go's containerSpec exactly.
-              _CONTAINER_KEYS = {"image", "credentials", "user"}
+              # vector. Mirror Go's containerSpec exactly. Only `image`
+              # and `user` are accepted; private registries can't be
+              # used for autograding (no safe way to deliver a pull
+              # secret to a student repo), so images must be public.
+              _CONTAINER_KEYS = {"image", "user"}
               c_extras = set(container) - _CONTAINER_KEYS
               if c_extras:
                   fail(f"runtime.container has unsupported keys: {sorted(c_extras)}")
@@ -297,16 +427,13 @@ jobs:
                   fail(f"runtime.container.image {image!r} must match {_IMAGE.pattern}")
               if apt:
                   fail("runtime.apt is not allowed when runtime.container is set")
-              if runs_on and runs_on not in {"ubuntu-latest", "ubuntu-24.04", "ubuntu-22.04", "ubuntu-20.04"}:
-                  fail(f"runtime.runs-on {runs_on!r} invalid with container: GitHub Actions runs containers on Ubuntu hosts only")
-              creds = container.get("credentials")
-              if creds is not None:
-                  if not isinstance(creds, dict) or not creds.get("username") or not creds.get("password"):
-                      fail("runtime.container.credentials must include both username and password")
-                  if not isinstance(creds["username"], str) or not isinstance(creds["password"], str):
-                      fail("runtime.container.credentials.username and .password must both be strings")
-                  if not _SECRET_REF.match(creds["password"]):
-                      fail("runtime.container.credentials.password must reference a GitHub Actions secret using the secrets.<NAME> expression syntax")
+              # Containers run on Ubuntu only — reject a recognized
+              # macOS/Windows label; custom/self-hosted labels pass
+              # (the teacher owns OS matching). Mirrors Go's
+              # isNonUbuntuHostedLabel.
+              for lbl in runs_on_labels:
+                  if lbl.startswith("macos-") or lbl.startswith("windows-"):
+                      fail(f"runtime.runs-on {lbl!r} invalid with container: GitHub Actions runs containers on Ubuntu hosts only")
               # Translate runtime.container.user to GitHub Actions'
               # container.options: --user <value>. Actions doesn't
               # accept container.user directly, but a non-root container
@@ -320,19 +447,14 @@ jobs:
               # any future schema-skew (e.g., a new GHA container key
               # added by Actions) from flowing through unchecked.
               emitted = {"image": image}
-              if creds is not None:
-                  emitted["credentials"] = creds
               if user is not None:
                   emitted["options"] = f"--user {user}"
-              if not runs_on:
-                  runs_on = _DEFAULT_RUNS_ON
+              if not runs_on_labels:
+                  runs_on_labels = [_DEFAULT_RUNS_ON]
               container_json = json.dumps(emitted)
           else:
-              if runs_on and runs_on not in _ALLOWED_RUNS_ON:
-                  allowed = ", ".join(sorted(_ALLOWED_RUNS_ON))
-                  fail(f"runtime.runs-on {runs_on!r} is not in the allow-list of GitHub-hosted runner labels (one of: {allowed})")
-              if not runs_on:
-                  runs_on = _DEFAULT_RUNS_ON
+              if not runs_on_labels:
+                  runs_on_labels = [_DEFAULT_RUNS_ON]
               container_json = "null"
               # Default the host path to a recent Python so teachers
               # don't need to set it explicitly for every assignment.
@@ -340,9 +462,14 @@ jobs:
               # the toolchain. (runner.py itself works on any 3.x
               # via the legacy tar-extraction fallback.)
               if not python:
-                  python = "3.12"
+                  python = "3.14"
 
-          for label, value in [("python", python), ("node", node), ("java", java), ("go", go)]:
+          # Emit runs-on as a JSON array consumed by the grade job via
+          # fromJSON, so a single hosted label and a multi-label
+          # self-hosted target share one code path.
+          runs_on_json = json.dumps(runs_on_labels)
+
+          for label, value in [("python", python), ("node", node), ("java", java), ("go", go), ("rust", rust)]:
               if value and (not isinstance(value, str) or not _LANG.match(value)):
                   fail(f"runtime.{label} {value!r} must match {_LANG.pattern}")
 
@@ -353,27 +480,160 @@ jobs:
                   fail(f"runtime.apt[{i}] {pkg!r} must match {_APT.pattern}")
           apt_str = " ".join(apt)
 
+          # === Feedback PR opt-in ===
+          # Mirror Go's bool `feedback_pr` field. Re-validated here (like
+          # the tests/runtime blocks) so a hand-edited manifest fails at
+          # setup with a clear error. Emitted as "true"/"false" so the
+          # grade job's post-grade step knows whether to open the PR.
+          feedback_pr = entry.get("feedback_pr", False)
+          if not isinstance(feedback_pr, bool):
+              fail(f"entry {assignment!r}: feedback_pr {feedback_pr!r} must be a boolean")
+
+          # Assignment mode (individual | group), normalized; drives the
+          # Feedback PR label so a teacher can tell them apart at a glance.
+          mode = (entry.get("mode") or "individual").strip().lower()
+          if mode not in ("individual", "group"):
+              fail(f"entry {assignment!r}: mode {mode!r} must be 'individual' or 'group'")
+
+          # === Allowed-files allowlist ===
+          # Re-validate the hand-editable manifest field and emit it as a
+          # JSON array for runner.py to enforce.
+          allowed_files = entry.get("allowed_files", [])
+          if not isinstance(allowed_files, list):
+              fail(f"entry {assignment!r}: allowed_files must be an array")
+          for i, pat in enumerate(allowed_files):
+              if not isinstance(pat, str) or not pat.strip():
+                  fail(f"entry {assignment!r}: allowed_files[{i}] {pat!r} must be a non-empty string")
+              if "\x00" in pat or "\n" in pat:
+                  fail(f"entry {assignment!r}: allowed_files[{i}] {pat!r} must not contain NUL or newline")
+          allowed_files_json = json.dumps(allowed_files)
+
+          # === Release assets ===
+          # Re-validate the hand-editable exact release asset paths and emit
+          # compact ordered JSON. Mirrors ValidateReleaseAssets (Go).
+          release_assets = entry.get("release_assets", [])
+          if not isinstance(release_assets, list):
+              fail(f"entry {assignment!r}: release_assets must be an array")
+          if len(release_assets) > 50:
+              fail(f"entry {assignment!r}: release_assets has {len(release_assets)} paths (max 50)")
+          _RELEASE_BASENAME = re.compile(
+              r"^[A-Za-z0-9_-](?:[A-Za-z0-9._-]{0,253}[A-Za-z0-9_-])?$",
+              re.ASCII,
+          )
+          _ASCII_UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+          _ASCII_LOWER = "abcdefghijklmnopqrstuvwxyz"
+          _ASCII_FOLD = str.maketrans(_ASCII_UPPER, _ASCII_LOWER)
+          seen_paths = set()
+          seen_basenames = set()
+          release_assets_path_bytes = 0
+          for i, configured_path in enumerate(release_assets):
+              where = f"entry {assignment!r}: release_assets[{i}]"
+              if not isinstance(configured_path, str) or not configured_path.strip():
+                  fail(f"{where} must be a non-empty string")
+              if any(0xD800 <= ord(char) <= 0xDFFF for char in configured_path):
+                  fail(f"{where} must not contain Unicode surrogates")
+              release_assets_path_bytes += len(configured_path.encode("utf-8"))
+              if release_assets_path_bytes > 8192:
+                  fail(f"entry {assignment!r}: release_assets paths exceed 8192 UTF-8 bytes")
+              if configured_path.startswith("/") or re.match(r"^[A-Za-z]:", configured_path, re.ASCII):
+                  fail(f"{where} must be relative")
+              if "\\" in configured_path:
+                  fail(f"{where} must use '/' separators")
+              if any(ord(char) < 0x20 or 0x7F <= ord(char) <= 0x9F for char in configured_path):
+                  fail(f"{where} must not contain control characters")
+              segments = configured_path.split("/")
+              if any(segment in ("", ".", "..") for segment in segments):
+                  fail(f"{where} has an invalid path segment")
+              if segments[0].translate(_ASCII_FOLD) == ".git":
+                  fail(f"{where} must not select the root .git tree")
+              basename = segments[-1]
+              folded_basename = basename.translate(_ASCII_FOLD)
+              if not _RELEASE_BASENAME.fullmatch(basename) or ".." in basename:
+                  fail(f"{where} basename {basename!r} is not Release-safe")
+              if folded_basename in ("result.json", "release-body.md"):
+                  fail(f"{where} basename {basename!r} is reserved")
+              if configured_path in seen_paths:
+                  fail(f"{where} duplicates path {configured_path!r}")
+              if basename in seen_basenames:
+                  fail(f"{where} duplicates basename {basename!r}")
+              seen_paths.add(configured_path)
+              seen_basenames.add(basename)
+          release_assets_json = json.dumps(
+              release_assets, separators=(",", ":"), ensure_ascii=False
+          )
+
           submission_tag = os.environ.get("SUBMISSION_TAG", "").strip()
           if not submission_tag:
               submission_tag = os.environ.get("GITHUB_REF_NAME", "")
               if not submission_tag.startswith("submit/"):
                   fail(f"submission tag {submission_tag!r} does not match submit/*")
 
+          # === No-autograder detection ===
+          # Skip grade + set-latest when nothing is configured to grade,
+          # inverting resolve_entrypoint's fall-through: no declarative tests
+          # AND no per-assignment bundle AND no classroom-default autograder.py.
+          # runner.py's no_autograder() stays the fail-open backstop. FAIL OPEN
+          # here too — a probe that can't prove absence must grade — so any
+          # non-404 / network error falls open to grading.
+          # The bundle + classroom-default URL shapes mirror runner.py's
+          # bundle_url / classroom_default_autograder_url (pinned by
+          # contract_test.go); segment left un-quoted to match classroom_segment
+          # (both parts are regex-validated upstream).
+          # Non-retrying: the outcome is only ever acted on for a confirmed 404,
+          # so a transient 5xx falls open to grading anyway — no point spending
+          # get()'s retry ladder on a result we'd discard.
+          def probe_absent(url):
+              try:
+                  req = urllib.request.Request(url, headers={"User-Agent": "classroom50-autograde-runner"})
+                  with urllib.request.urlopen(req, timeout=30) as resp:
+                      resp.read(1)
+                  return False
+              except urllib.error.HTTPError as exc:
+                  if exc.code == 404:
+                      return True
+                  print(f"::warning::autograder probe GET {url}: HTTP {exc.code}; grading proceeds")
+                  return False
+              except urllib.error.URLError as exc:
+                  print(f"::warning::autograder probe GET {url}: {exc.reason}; grading proceeds")
+                  return False
+
+          has_tests = isinstance(tests, list) and len(tests) > 0
+          no_autograder = False
+          if not has_tests:
+              seg = classroom_segment(classroom, secret)
+              bundle = f"{base_url}/{seg}/autograders/{assignment}.tar.gz"
+              default_py = f"{base_url}/{seg}/autograder.py"
+              no_autograder = probe_absent(bundle) and probe_absent(default_py)
+
           emit("submission-tag", submission_tag)
-          emit("runs-on", runs_on)
+          emit("runs-on", runs_on_json)
           emit("container", container_json)
           emit("python", python)
           emit("node", node)
           emit("java", java)
           emit("go", go)
+          emit("rust", rust)
           emit("apt", apt_str)
           emit("base-url", base_url)
           emit("classroom", classroom)
           emit("assignment", assignment)
+          emit("secret", secret)
+          emit("feedback-pr", "true" if feedback_pr else "false")
+          emit("mode", mode)
+          emit("allowed-files", allowed_files_json)
+          emit("release-assets", release_assets_json)
+          emit("no-autograder", "true" if no_autograder else "false")
 
   grade:
     needs: setup
-    runs-on:   ${{ needs.setup.outputs.runs-on }}
+    # Skip only the acceptance commit. The no-autograder case still runs so the
+    # submission is RECORDED: runner.py synthesizes a vacuous-pass (0/0 success)
+    # result and the Release step publishes it, keeping the submission visible on
+    # the teacher dashboard (which reads submit/* releases). Language-toolchain
+    # setup is separately gated off no-autograder below, so this cheap path spends
+    # no minutes installing toolchains it won't use.
+    if: needs.setup.outputs.is-acceptance != 'true'
+    runs-on:   ${{ fromJSON(needs.setup.outputs.runs-on) }}
     container: ${{ fromJSON(needs.setup.outputs.container) }}
     timeout-minutes: 15
     # Pin bash explicitly. GitHub-hosted runners default run: steps
@@ -390,37 +650,81 @@ jobs:
       CLASSROOM:      ${{ needs.setup.outputs.classroom }}
       ASSIGNMENT:     ${{ needs.setup.outputs.assignment }}
       SUBMISSION_TAG: ${{ needs.setup.outputs.submission-tag }}
+      # Optional capability-URL secret from .classroom50.yaml (via setup).
+      # runner.py inserts it into the fetch URLs; empty = plain path.
+      SECRET:         ${{ needs.setup.outputs.secret }}
+      # Assignment mode (individual | group) from assignments.json, so
+      # runner.py validates a group autograder's multi-username result.json
+      # instead of rejecting it. Defaults to the stricter individual rule
+      # when absent.
+      MODE:           ${{ needs.setup.outputs.mode }}
+      # allowed_files patterns (JSON array) from assignments.json;
+      # runner.py removes disallowed files before grading. "[]" = allow all.
+      ALLOWED_FILES:  ${{ needs.setup.outputs.allowed-files }}
+      # release_assets paths (JSON array) from assignments.json; runner.py
+      # stages the exact regular files post-grading for the Release step below.
+      # "[]" = none.
+      RELEASE_ASSETS: ${{ needs.setup.outputs.release-assets }}
     steps:
-      - uses: actions/checkout@v6
+      - name: Check out submission
+        uses: actions/checkout@v7
         with:
-          ref: ${{ needs.setup.outputs.submission-tag }}
+          ref: ${{ github.sha }}
           # Full history -- runner.py needs the student's baseline
           # commit for the full-diff review link.
           fetch-depth: 0
+          persist-credentials: false
 
       # === Language toolchains (driven by `runtime:` in assignments.json) ===
-      - if: needs.setup.outputs.python != ''
-        uses: actions/setup-python@v6
+      # All gated on a hosted runner: `runner.environment` is resolved on the
+      # actual runner at step time and is 'self-hosted' | 'github-hosted'. A
+      # self-hosted runner supplies its own prebuilt toolchains (and their
+      # dependencies), so layering setup-* / apt on top would shadow the
+      # runner's environment and break autograders that import preinstalled
+      # packages (see issue #369). Keyed on the runner itself — not the
+      # `runs-on` label — so it also covers self-hosted runners registered
+      # with --no-default-labels or selected by a runner group.
+      #
+      # Also gated off no-autograder: when nothing is configured to grade, the
+      # job still runs to RECORD the submission (runner.py's vacuous-pass), but
+      # it needs only system python3 — so skip every toolchain install and spend
+      # no minutes provisioning a toolchain the recording path won't use.
+      - name: Set up Python
+        if: needs.setup.outputs.python != '' && needs.setup.outputs.no-autograder != 'true' && runner.environment != 'self-hosted'
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ needs.setup.outputs.python }}
 
-      - if: needs.setup.outputs.node != ''
-        uses: actions/setup-node@v4
+      - name: Set up Node
+        if: needs.setup.outputs.node != '' && needs.setup.outputs.no-autograder != 'true' && runner.environment != 'self-hosted'
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ needs.setup.outputs.node }}
 
-      - if: needs.setup.outputs.java != ''
-        uses: actions/setup-java@v4
+      - name: Set up Java
+        if: needs.setup.outputs.java != '' && needs.setup.outputs.no-autograder != 'true' && runner.environment != 'self-hosted'
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: ${{ needs.setup.outputs.java }}
 
-      - if: needs.setup.outputs.go != ''
-        uses: actions/setup-go@v5
+      - name: Set up Go
+        if: needs.setup.outputs.go != '' && needs.setup.outputs.no-autograder != 'true' && runner.environment != 'self-hosted'
+        uses: actions/setup-go@v7
         with:
           go-version: ${{ needs.setup.outputs.go }}
 
-      - if: needs.setup.outputs.apt != '' && runner.os == 'Linux'
+      # No first-party setup-rust; dtolnay/rust-toolchain is the de-facto
+      # standard. Pinned to @master with an explicit `toolchain:` input
+      # (its @rev-derived default can't read a version from a SHA pin).
+      - name: Set up Rust
+        if: needs.setup.outputs.rust != '' && needs.setup.outputs.no-autograder != 'true' && runner.environment != 'self-hosted'
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ needs.setup.outputs.rust }}
+
+      - name: Install apt packages
+        if: needs.setup.outputs.apt != '' && needs.setup.outputs.no-autograder != 'true' && runner.os == 'Linux' && runner.environment != 'self-hosted'
         run: |
           set -euo pipefail
           sudo apt-get update -qq
@@ -431,18 +735,32 @@ jobs:
       # runner-side bootstrap propagate without editing this file.
       # Replace this block to swap to a non-Python bootstrap.
       # `--retry-all-errors` covers DNS / TLS / 5xx / partial response;
-      # 3 attempts at 2s/4s/8s budgets ~14s plus the 30s per-attempt
-      # ceiling — well under the grade job's 15-minute timeout.
-      - id: autograde
+      # `--retry-delay 2` uses a fixed 2s gap (it disables curl's
+      # exponential backoff), so 3 retries add ~6s plus the 30s
+      # per-attempt ceiling — well under the grade job's 15-minute timeout.
+      - name: Grade details
+        id: autograde
         run: |
           set -euo pipefail
+          # Re-assert the checkout as safe before git-dependent steps. In
+          # a container the bind-mounted repo is owned by the host runner
+          # user but git runs as a different UID, tripping git's "dubious
+          # ownership" guard. actions/checkout's own entry was written
+          # under a now-restored temporary HOME, so set it again here (under
+          # the runtime HOME) so runner.py can read history. Guard the
+          # --add so repeated runs on a persistent-HOME (self-hosted)
+          # runner don't accumulate duplicate lines in ~/.gitconfig.
+          SAFE_DIR="${GITHUB_WORKSPACE:-$PWD}"
+          git config --global --get-all safe.directory 2>/dev/null | grep -qxF "$SAFE_DIR" \
+            || git config --global --add safe.directory "$SAFE_DIR" || true
           RUNNER_SCRIPT="${RUNNER_TEMP:-/tmp}/classroom50-runner.py"
           curl -fsSL --max-time 30 --retry 3 --retry-delay 2 --retry-all-errors \
                "${PAGES_BASE_URL}/runner.py" -o "$RUNNER_SCRIPT"
           python3 "$RUNNER_SCRIPT"
 
       # === Post commit status ===
-      - if: always()
+      - name: Post commit status
+        if: always()
         env:
           GH_TOKEN: ${{ github.token }}
           STATE:   ${{ steps.autograde.outputs.status || 'error' }}
@@ -460,26 +778,129 @@ jobs:
       # Created with --latest=false; the set-latest job below owns
       # the latest-pointer flip (serialized to avoid races between
       # concurrent grade jobs). Idempotent on workflow re-runs.
-      - if: success() && steps.autograde.outputs.status != 'error'
+      - name: Publish submission release
+        if: success() && steps.autograde.outputs.status != 'error'
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ env.SUBMISSION_TAG }}
+          # Distinct name from the job-level RELEASE_ASSETS (a JSON array fed to
+          # runner.py): this is the comma-joined list of accepted basenames the
+          # runner emits post-staging. Different wire shape, different name, so a
+          # future edit can't feed the JSON array into the IFS=',' read below.
+          STAGED_RELEASE_BASENAMES: ${{ steps.autograde.outputs.release-assets }}
+          # Absolute dir runner.py actually staged into, so this step reads from
+          # exactly where the runner wrote instead of re-deriving it from
+          # RUNNER_TEMP (the two fallbacks diverged when RUNNER_TEMP was unset).
+          STAGED_RELEASE_DIR: ${{ steps.autograde.outputs.release-assets-dir }}
         run: |
           set -euo pipefail
-          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" \
-              --title "Submission $TAG" \
-              --notes-file release-body.md \
-              --latest=false
-            gh release upload "$TAG" result.json \
-              --repo "$GITHUB_REPOSITORY" --clobber
-          else
-            gh release create "$TAG" result.json \
-              --repo "$GITHUB_REPOSITORY" \
-              --title "Submission $TAG" \
-              --notes-file release-body.md \
-              --latest=false
+          ASSETS_DIR="${STAGED_RELEASE_DIR:-${RUNNER_TEMP:-/tmp}/classroom50-release-assets}"
+
+          # Collect the valid staged extras FIRST, so they're attached in the
+          # same `gh release create` as result.json. Immutable releases (an org
+          # ruleset can enforce them) reject a later `gh release upload`/`edit`
+          # with HTTP 422, so assets must be baked in at creation time — a
+          # post-create upload can never succeed there. Re-validate each staged
+          # basename (defense in depth: these came from runner.py's strict
+          # validator, but the workflow re-checks before anything reaches gh).
+          EXTRA_ASSETS=()
+          if [[ -n "${STAGED_RELEASE_BASENAMES:-}" ]]; then
+            IFS=',' read -r -a ASSET_NAMES <<< "${STAGED_RELEASE_BASENAMES:-}"
+            for NAME in "${ASSET_NAMES[@]}"; do
+              [[ -n "$NAME" ]] || continue
+              if [[ ! "$NAME" =~ ^[A-Za-z0-9._-]{1,255}$ || "$NAME" == .* || "$NAME" == *. || "$NAME" == *..* ]]; then
+                echo "::warning::release_assets: invalid staged basename (skipped)"
+                continue
+              fi
+              case "$(printf '%s' "$NAME" | LC_ALL=C tr '[:upper:]' '[:lower:]')" in
+                result.json|release-body.md)
+                  echo "::warning::release_assets: reserved staged basename $NAME (skipped)"
+                  continue
+                  ;;
+              esac
+              ASSET="$ASSETS_DIR/$NAME"
+              if [[ ! -f "$ASSET" || -L "$ASSET" ]]; then
+                echo "::warning::release_assets: staged $NAME is missing or unsafe (skipped)"
+                continue
+              fi
+              EXTRA_ASSETS+=("$ASSET")
+            done
           fi
+
+          # Recreate on re-run: an immutable release can't have result.json
+          # clobbered or new assets uploaded, so a re-run must delete and
+          # recreate to attach the current result + extras atomically. Keep the
+          # git tag (--cleanup-tag omitted) so the submission ref is unchanged.
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release delete "$TAG" --repo "$GITHUB_REPOSITORY" --yes
+          fi
+          gh release create "$TAG" result.json ${EXTRA_ASSETS[@]+"${EXTRA_ASSETS[@]}"} \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Submission $TAG" \
+            --notes-file release-body.md \
+            --latest=false
+
+      # === Ensure the Feedback PR ===
+      # Opt-in per assignment (feedback-pr). One long-lived PR per repo:
+      # base = the frozen `feedback` branch at the baseline commit,
+      # head = the default branch, so the teacher reviews the full
+      # starter→latest diff with inline comments and it auto-updates on
+      # every submission. Runs on always() so a failing submission still
+      # gets a review surface, but only fires once there's a diff
+      # (baseline-sha != head-sha) — GitHub won't open a no-commit PR.
+      # Idempotent: reuse the one PR across submissions; reopen only a
+      # student's *unmerged* close (a teacher merge means grading is
+      # done). PRs opened by GITHUB_TOKEN don't retrigger workflows, so
+      # there's no loop, and this adds no new workflow runs.
+      - name: Ensure Feedback PR
+        id: feedback_pr
+        if: >-
+          always() &&
+          needs.setup.outputs.feedback-pr == 'true' &&
+          steps.autograde.outputs.baseline-sha != '' &&
+          steps.autograde.outputs.head-sha != '' &&
+          steps.autograde.outputs.baseline-sha != steps.autograde.outputs.head-sha
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE_SHA: ${{ steps.autograde.outputs.baseline-sha }}
+          MODE: ${{ needs.setup.outputs.mode }}
+        # The control flow lives in ensure_feedback_pr.py (fetched from Pages,
+        # like runner.py) so it's unit-testable with a stubbed gh; this step
+        # is a thin fetch+exec shim. The script freezes the `feedback` base,
+        # maintains the one PR, and posts the classroom50/feedback-pr status.
+        # --retry-all-errors covers DNS/TLS/5xx/partial-response; the script
+        # itself exits 0 for every outcome (state is in the commit status).
+        run: |
+          set -euo pipefail
+          FB_SCRIPT="${RUNNER_TEMP:-/tmp}/classroom50-ensure-feedback-pr.py"
+          curl -fsSL --max-time 30 --retry 3 --retry-delay 2 --retry-all-errors \
+               "${PAGES_BASE_URL}/ensure_feedback_pr.py" -o "$FB_SCRIPT"
+          python3 "$FB_SCRIPT"
+
+      # The script posts the classroom50/feedback-pr status itself for every
+      # outcome it reaches. But if the FETCH above fails (Pages 5xx past
+      # retries), the step aborts before the script runs and posts nothing —
+      # so this fallback posts an `error` status only when the step didn't
+      # succeed, keeping the "agent can always poll feedback-pr" guarantee
+      # (mirrors the autograde status's always() posting).
+      - name: Feedback PR status fallback
+        if: >-
+          always() &&
+          needs.setup.outputs.feedback-pr == 'true' &&
+          steps.autograde.outputs.baseline-sha != '' &&
+          steps.autograde.outputs.head-sha != '' &&
+          steps.autograde.outputs.baseline-sha != steps.autograde.outputs.head-sha &&
+          steps.feedback_pr.outcome != 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          gh api "repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
+            -f state="error" \
+            -f context="classroom50/feedback-pr" \
+            -f description="Feedback PR step could not run (could not fetch ensure_feedback_pr.py from Pages)" \
+            -f target_url="$RUN_URL" >/dev/null 2>&1 || true
 
   # === Move the "latest" pointer forward ===
   # Serialized across the whole repo so concurrent submissions can't
@@ -491,13 +912,17 @@ jobs:
   # reclaiming latest.
   set-latest:
     needs: [setup, grade]
+    # Advance latest for any recorded submission — including the no-autograder
+    # vacuous pass (status 'success'), so its release becomes the latest the
+    # dashboard surfaces. Gated only on a clean grade result with a real status.
     if: needs.grade.result == 'success' && (needs.grade.outputs.status == 'success' || needs.grade.outputs.status == 'failure')
     runs-on: ubuntu-latest
     concurrency:
       group: classroom50-set-latest-${{ github.repository }}
       cancel-in-progress: false
     steps:
-      - env:
+      - name: Advance latest release pointer
+        env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ needs.setup.outputs.submission-tag }}
           SHA: ${{ github.sha }}
