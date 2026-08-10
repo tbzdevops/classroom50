@@ -12,6 +12,13 @@
         "repo": "techstyle",
         "branch": "day1_solution"
       },
+      "available_from": "2026-08-10T21:02:00Z",
+      "available_from_meta": {
+        "input": "2026-08-10T23:02:00",
+        "zone": "Europe/Zurich",
+        "offset": "+02:00",
+        "source": "auto-detected"
+      },
       "max_group_size": 2,
       "tests": [
         {
