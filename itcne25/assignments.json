@@ -30,6 +30,19 @@
           "expected": "hello"
         }
       ]
+    },
+    {
+      "slug": "day04",
+      "name": "Day04",
+      "mode": "group",
+      "autograder": "default",
+      "feedback_pr": true,
+      "template": {
+        "owner": "tbzdevops",
+        "repo": "techstyle",
+        "branch": "day_4_solution"
+      },
+      "max_group_size": 2
     }
   ]
 }
