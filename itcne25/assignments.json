@@ -42,7 +42,24 @@
         "repo": "techstyle",
         "branch": "day_4_solution"
       },
-      "max_group_size": 2
+      "available_from": "2026-08-10T21:18:00Z",
+      "available_from_meta": {
+        "input": "2026-08-10T23:18:00",
+        "zone": "Europe/Zurich",
+        "offset": "+02:00",
+        "source": "auto-detected"
+      },
+      "max_group_size": 2,
+      "tests": [
+        {
+          "name": "test",
+          "type": "io",
+          "run": "test",
+          "points": 10,
+          "comparison": "included",
+          "expected": "test"
+        }
+      ]
     }
   ]
 }
