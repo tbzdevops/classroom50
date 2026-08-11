@@ -1,4 +1,130 @@
 {
   "schema": "classroom50/scores/v1",
-  "assignments": {}
+  "assignments": {
+    "day01": {
+      "type": "group",
+      "entries": [
+        {
+          "owner": "patrick-morgenegg",
+          "member_usernames": [
+            "patrick-morgenegg",
+            "patrickmorgeneggtbz"
+          ],
+          "submissions": [
+            {
+              "schema": "classroom50/result/v1",
+              "classroom": "itcne25",
+              "assignment_type": "group",
+              "owner": "patrick-morgenegg",
+              "submission": "submit/2026-08-10T21-05-39Z-9614db3",
+              "commit": "https://github.com/tbzdevops/itcne25-day01-patrick-morgenegg/commit/9614db301609da2c84583a804054c2bde864ed4b",
+              "release": "https://github.com/tbzdevops/itcne25-day01-patrick-morgenegg/releases/tag/submit%2F2026-08-10T21-05-39Z-9614db3",
+              "review": "https://github.com/tbzdevops/itcne25-day01-patrick-morgenegg/compare/61b946bad16cceacd8745c832c99b15deced45de...9614db301609da2c84583a804054c2bde864ed4b",
+              "datetime": "2026-08-10T21:05:24Z",
+              "graded_at": "2026-08-10T21:06:02Z",
+              "score": 0,
+              "max-score": 10,
+              "tests": [
+                {
+                  "test-name": "print hello workd",
+                  "passed": false,
+                  "score": 0,
+                  "max-score": 10
+                }
+              ],
+              "submitted_by": {
+                "username": "patrick-morgenegg",
+                "id": 29059216
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "day04": {
+      "type": "group",
+      "entries": [
+        {
+          "owner": "patrick-morgenegg",
+          "member_usernames": [
+            "patrick-morgenegg",
+            "patrickmorgeneggtbz"
+          ],
+          "submissions": [
+            {
+              "schema": "classroom50/result/v1",
+              "classroom": "itcne25",
+              "assignment_type": "group",
+              "owner": "patrick-morgenegg",
+              "submission": "submit/2026-08-10T21-35-11Z-b757d98",
+              "commit": "https://github.com/tbzdevops/itcne25-day04-patrick-morgenegg/commit/b757d9836e62b98d0b66623fe25ed0fee6659def",
+              "release": "https://github.com/tbzdevops/itcne25-day04-patrick-morgenegg/releases/tag/submit%2F2026-08-10T21-35-11Z-b757d98",
+              "review": "https://github.com/tbzdevops/itcne25-day04-patrick-morgenegg/compare/8d726e8a5cdc5306f3594492b1e9b240aba040b9...b757d9836e62b98d0b66623fe25ed0fee6659def",
+              "datetime": "2026-08-10T21:34:46Z",
+              "graded_at": "2026-08-10T21:35:35Z",
+              "score": 0,
+              "max-score": 0,
+              "tests": [],
+              "submitted_by": {
+                "username": "patrick-morgenegg",
+                "id": 29059216
+              }
+            },
+            {
+              "schema": "classroom50/result/v1",
+              "classroom": "itcne25",
+              "assignment_type": "group",
+              "owner": "patrick-morgenegg",
+              "submission": "submit/2026-08-10T21-33-04Z-ac04408",
+              "commit": "https://github.com/tbzdevops/itcne25-day04-patrick-morgenegg/commit/ac044088e92c1916fa4df74e6baf44ebc3a5cb24",
+              "release": "https://github.com/tbzdevops/itcne25-day04-patrick-morgenegg/releases/tag/submit%2F2026-08-10T21-33-04Z-ac04408",
+              "review": "https://github.com/tbzdevops/itcne25-day04-patrick-morgenegg/compare/8d726e8a5cdc5306f3594492b1e9b240aba040b9...ac044088e92c1916fa4df74e6baf44ebc3a5cb24",
+              "datetime": "2026-08-10T21:32:49Z",
+              "graded_at": "2026-08-10T21:33:20Z",
+              "score": 0,
+              "max-score": 10,
+              "tests": [
+                {
+                  "test-name": "test",
+                  "passed": false,
+                  "score": 0,
+                  "max-score": 10
+                }
+              ],
+              "submitted_by": {
+                "username": "patrick-morgenegg",
+                "id": 29059216
+              }
+            },
+            {
+              "schema": "classroom50/result/v1",
+              "classroom": "itcne25",
+              "assignment_type": "group",
+              "owner": "patrick-morgenegg",
+              "submission": "submit/2026-08-10T21-27-04Z-aa076fe",
+              "commit": "https://github.com/tbzdevops/itcne25-day04-patrick-morgenegg/commit/aa076fe8c3ccb546a884bc1b43f7c4bbeccac778",
+              "release": "https://github.com/tbzdevops/itcne25-day04-patrick-morgenegg/releases/tag/submit%2F2026-08-10T21-27-04Z-aa076fe",
+              "review": "https://github.com/tbzdevops/itcne25-day04-patrick-morgenegg/compare/8d726e8a5cdc5306f3594492b1e9b240aba040b9...aa076fe8c3ccb546a884bc1b43f7c4bbeccac778",
+              "datetime": "2026-08-10T21:26:51Z",
+              "graded_at": "2026-08-10T21:27:13Z",
+              "score": 0,
+              "max-score": 10,
+              "tests": [
+                {
+                  "test-name": "test",
+                  "passed": false,
+                  "score": 0,
+                  "max-score": 10
+                }
+              ],
+              "submitted_by": {
+                "username": "patrick-morgenegg",
+                "id": 29059216
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
 }
