@@ -29,7 +29,11 @@
           "comparison": "included",
           "expected": "hello"
         }
-      ]
+      ],
+      "submission_mode": "tag",
+      "grading": {
+        "mode": "auto"
+      }
     },
     {
       "slug": "day04",
@@ -49,7 +53,11 @@
         "offset": "+02:00",
         "source": "auto-detected"
       },
-      "max_group_size": 2
+      "max_group_size": 2,
+      "submission_mode": "tag",
+      "grading": {
+        "mode": "auto"
+      }
     }
   ]
 }
