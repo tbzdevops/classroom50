@@ -27,11 +27,10 @@
     },
     {
       "slug": "project",
-      "name": "day04",
+      "name": "project",
       "mode": "group",
       "autograder": "default",
       "feedback_pr": true,
-      "include_all_branches": true,
       "copy_about": true,
       "copy_topics": true,
       "template": {
