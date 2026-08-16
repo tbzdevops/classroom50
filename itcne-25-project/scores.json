@@ -16,12 +16,126 @@
               "classroom": "itcne-25-project",
               "assignment_type": "group",
               "owner": "patrickmorgeneggtbz",
-              "submission": "submit/2026-08-15T20-04-18Z-624f669",
-              "commit": "https://github.com/tbzdevops/itcne-25-project-day04-patrickmorgeneggtbz/commit/624f6698009c4079bf9acdaf01c049d11e3b9f63",
-              "release": "https://github.com/tbzdevops/itcne-25-project-day04-patrickmorgeneggtbz/releases/tag/submit%2F2026-08-15T20-04-18Z-624f669",
-              "review": "https://github.com/tbzdevops/itcne-25-project-day04-patrickmorgeneggtbz/compare/7c0d8595b86523cb37a3cf6bd501221089547d33...624f6698009c4079bf9acdaf01c049d11e3b9f63",
-              "datetime": "2026-08-15T20:04:06Z",
-              "graded_at": "2026-08-15T20:04:29Z",
+              "submission": "submit/2026-08-15T21-16-59Z-628148f",
+              "commit": "https://github.com/tbzdevops/itcne-25-project-day04-patrickmorgeneggtbz/commit/628148febc38a8bfb3ad04fe950008c3888b0ef8",
+              "release": "https://github.com/tbzdevops/itcne-25-project-day04-patrickmorgeneggtbz/releases/tag/submit%2F2026-08-15T21-16-59Z-628148f",
+              "review": "https://github.com/tbzdevops/itcne-25-project-day04-patrickmorgeneggtbz/compare/f159e335485bc81716db7e580fe6283249b26c8a...628148febc38a8bfb3ad04fe950008c3888b0ef8",
+              "datetime": "2026-08-15T21:16:47Z",
+              "graded_at": "2026-08-15T21:17:15Z",
+              "score": 0,
+              "max-score": 0,
+              "tests": [],
+              "submitted_by": {
+                "username": "patrickmorgeneggtbz",
+                "id": 178424826
+              }
+            },
+            {
+              "schema": "classroom50/result/v1",
+              "classroom": "itcne-25-project",
+              "assignment_type": "group",
+              "owner": "patrickmorgeneggtbz",
+              "submission": "submit/2026-08-15T21-15-41Z-367012c",
+              "commit": "https://github.com/tbzdevops/itcne-25-project-day04-patrickmorgeneggtbz/commit/367012c210571cc9b0210d82114e31d57593abeb",
+              "release": "https://github.com/tbzdevops/itcne-25-project-day04-patrickmorgeneggtbz/releases/tag/submit%2F2026-08-15T21-15-41Z-367012c",
+              "review": "https://github.com/tbzdevops/itcne-25-project-day04-patrickmorgeneggtbz/compare/f159e335485bc81716db7e580fe6283249b26c8a...367012c210571cc9b0210d82114e31d57593abeb",
+              "datetime": "2026-08-15T21:15:24Z",
+              "graded_at": "2026-08-15T21:15:55Z",
+              "score": 0,
+              "max-score": 0,
+              "tests": [],
+              "submitted_by": {
+                "username": "patrickmorgeneggtbz",
+                "id": 178424826
+              }
+            },
+            {
+              "schema": "classroom50/result/v1",
+              "classroom": "itcne-25-project",
+              "assignment_type": "group",
+              "owner": "patrickmorgeneggtbz",
+              "submission": "submit/2026-08-15T21-01-06Z-c3e4f13",
+              "commit": "https://github.com/tbzdevops/itcne-25-project-day04-patrickmorgeneggtbz/commit/c3e4f13304591bf8589a5e6d5efa2c8baad25fb9",
+              "release": "https://github.com/tbzdevops/itcne-25-project-day04-patrickmorgeneggtbz/releases/tag/submit%2F2026-08-15T21-01-06Z-c3e4f13",
+              "review": "https://github.com/tbzdevops/itcne-25-project-day04-patrickmorgeneggtbz/compare/f159e335485bc81716db7e580fe6283249b26c8a...c3e4f13304591bf8589a5e6d5efa2c8baad25fb9",
+              "datetime": "2026-08-15T21:00:42Z",
+              "graded_at": "2026-08-15T21:01:20Z",
+              "score": 0,
+              "max-score": 0,
+              "tests": [],
+              "submitted_by": {
+                "username": "patrickmorgeneggtbz",
+                "id": 178424826
+              }
+            },
+            {
+              "schema": "classroom50/result/v1",
+              "classroom": "itcne-25-project",
+              "assignment_type": "group",
+              "owner": "patrickmorgeneggtbz",
+              "submission": "submit/2026-08-15T21-00-26Z-0feae4f",
+              "commit": "https://github.com/tbzdevops/itcne-25-project-day04-patrickmorgeneggtbz/commit/0feae4f981f0cd0aac7a9802c238dc44ee18a648",
+              "release": "https://github.com/tbzdevops/itcne-25-project-day04-patrickmorgeneggtbz/releases/tag/submit%2F2026-08-15T21-00-26Z-0feae4f",
+              "review": "https://github.com/tbzdevops/itcne-25-project-day04-patrickmorgeneggtbz/compare/f159e335485bc81716db7e580fe6283249b26c8a...0feae4f981f0cd0aac7a9802c238dc44ee18a648",
+              "datetime": "2026-08-15T20:59:59Z",
+              "graded_at": "2026-08-15T21:00:39Z",
+              "score": 0,
+              "max-score": 0,
+              "tests": [],
+              "submitted_by": {
+                "username": "patrickmorgeneggtbz",
+                "id": 178424826
+              }
+            },
+            {
+              "schema": "classroom50/result/v1",
+              "classroom": "itcne-25-project",
+              "assignment_type": "group",
+              "owner": "patrickmorgeneggtbz",
+              "submission": "submit/2026-08-15T20-59-50Z-7124320",
+              "commit": "https://github.com/tbzdevops/itcne-25-project-day04-patrickmorgeneggtbz/commit/712432076ee2321a1c664392179a34e1b91bfbd4",
+              "release": "https://github.com/tbzdevops/itcne-25-project-day04-patrickmorgeneggtbz/releases/tag/submit%2F2026-08-15T20-59-50Z-7124320",
+              "review": "https://github.com/tbzdevops/itcne-25-project-day04-patrickmorgeneggtbz/compare/f159e335485bc81716db7e580fe6283249b26c8a...712432076ee2321a1c664392179a34e1b91bfbd4",
+              "datetime": "2026-08-15T20:59:34Z",
+              "graded_at": "2026-08-15T21:00:03Z",
+              "score": 0,
+              "max-score": 0,
+              "tests": [],
+              "submitted_by": {
+                "username": "patrickmorgeneggtbz",
+                "id": 178424826
+              }
+            },
+            {
+              "schema": "classroom50/result/v1",
+              "classroom": "itcne-25-project",
+              "assignment_type": "group",
+              "owner": "patrickmorgeneggtbz",
+              "submission": "submit/2026-08-15T20-59-05Z-2432762",
+              "commit": "https://github.com/tbzdevops/itcne-25-project-day04-patrickmorgeneggtbz/commit/2432762427fcf8641b1b1dd34dd369a3647c14b1",
+              "release": "https://github.com/tbzdevops/itcne-25-project-day04-patrickmorgeneggtbz/releases/tag/submit%2F2026-08-15T20-59-05Z-2432762",
+              "review": "https://github.com/tbzdevops/itcne-25-project-day04-patrickmorgeneggtbz/compare/f159e335485bc81716db7e580fe6283249b26c8a...2432762427fcf8641b1b1dd34dd369a3647c14b1",
+              "datetime": "2026-08-15T20:58:52Z",
+              "graded_at": "2026-08-15T20:59:18Z",
+              "score": 0,
+              "max-score": 0,
+              "tests": [],
+              "submitted_by": {
+                "username": "patrickmorgeneggtbz",
+                "id": 178424826
+              }
+            },
+            {
+              "schema": "classroom50/result/v1",
+              "classroom": "itcne-25-project",
+              "assignment_type": "group",
+              "owner": "patrickmorgeneggtbz",
+              "submission": "submit/2026-08-15T20-56-21Z-932885c",
+              "commit": "https://github.com/tbzdevops/itcne-25-project-day04-patrickmorgeneggtbz/commit/932885ce2af160fbe69ee9bcab1b6c9276428ead",
+              "release": "https://github.com/tbzdevops/itcne-25-project-day04-patrickmorgeneggtbz/releases/tag/submit%2F2026-08-15T20-56-21Z-932885c",
+              "review": "https://github.com/tbzdevops/itcne-25-project-day04-patrickmorgeneggtbz/compare/f159e335485bc81716db7e580fe6283249b26c8a...932885ce2af160fbe69ee9bcab1b6c9276428ead",
+              "datetime": "2026-08-15T20:56:07Z",
+              "graded_at": "2026-08-15T20:56:35Z",
               "score": 0,
               "max-score": 0,
               "tests": [],
@@ -33,7 +147,12 @@
           ]
         }
       ],
-      "collected_at": "2026-08-15T20:15:31Z"
+      "collected_at": "2026-08-16T04:52:52Z"
+    },
+    "project": {
+      "type": "group",
+      "entries": [],
+      "collected_at": "2026-08-16T04:52:52Z"
     }
   }
 }
