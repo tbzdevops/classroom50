@@ -2,12 +2,11 @@
   "schema": "classroom50/assignments/v1",
   "assignments": [
     {
-      "slug": "day04",
-      "name": "day04",
+      "slug": "project",
+      "name": "project",
       "mode": "group",
       "autograder": "default",
       "feedback_pr": true,
-      "include_all_branches": true,
       "copy_about": true,
       "copy_topics": true,
       "template": {
@@ -26,11 +25,13 @@
       "submission_mode": "every-push"
     },
     {
-      "slug": "project",
-      "name": "project",
+      "slug": "day04",
+      "name": "day04",
       "mode": "group",
       "autograder": "default",
       "feedback_pr": true,
+      "no_autograder": true,
+      "include_all_branches": true,
       "copy_about": true,
       "copy_topics": true,
       "template": {
