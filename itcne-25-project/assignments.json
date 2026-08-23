@@ -23,31 +23,6 @@
       },
       "max_group_size": 3,
       "submission_mode": "every-push"
-    },
-    {
-      "slug": "day04",
-      "name": "day04",
-      "mode": "group",
-      "autograder": "default",
-      "feedback_pr": true,
-      "no_autograder": true,
-      "include_all_branches": true,
-      "copy_about": true,
-      "copy_topics": true,
-      "template": {
-        "owner": "tbzdevops",
-        "repo": "techstyle",
-        "branch": "day_4_solution"
-      },
-      "available_from": "2026-08-15T19:59:00Z",
-      "available_from_meta": {
-        "input": "2026-08-15T21:59:00",
-        "zone": "Europe/Zurich",
-        "offset": "+02:00",
-        "source": "auto-detected"
-      },
-      "max_group_size": 3,
-      "submission_mode": "every-push"
     }
   ]
 }
