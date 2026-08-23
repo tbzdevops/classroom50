@@ -145,6 +145,126 @@
         "source": "auto-detected"
       },
       "max_group_size": 3
+    },
+    {
+      "slug": "tag04-praxis",
+      "name": "Tag 04 Praxis — CI Grundlagen mit GitHub Actions",
+      "description": "Praxis-Uebungen zu Tag 4: Hello-CI-Workflow, automatisierter Build mit pytest und (optional) Linter plus Docker-Build. Das Repository enthaelt nur das Ordnergeruest — jede Datei schreibst du selbst.",
+      "mode": "group",
+      "autograder": "default",
+      "feedback_pr": true,
+      "no_autograder": true,
+      "copy_about": true,
+      "copy_topics": true,
+      "template": {
+        "owner": "tbzdevops",
+        "repo": "praxis-day04",
+        "branch": "main"
+      },
+      "available_from": "2026-08-23T22:00:00Z",
+      "available_from_meta": {
+        "input": "2026-08-24T00:00:00",
+        "zone": "Europe/Zurich",
+        "offset": "+02:00",
+        "source": "auto-detected"
+      },
+      "max_group_size": 3
+    },
+    {
+      "slug": "tag12-praxis",
+      "name": "Tag 12 Praxis — DevSecOps",
+      "description": "Praxis-Uebungen zu Tag 12: statische Analyse mit Snyk (SAST/SCA), dynamischer Test mit OWASP ZAP (DAST) an der DSVPWA-App und die Automatisierung beider Scans in GitHub Actions.",
+      "mode": "group",
+      "autograder": "default",
+      "feedback_pr": true,
+      "no_autograder": true,
+      "copy_about": true,
+      "copy_topics": true,
+      "template": {
+        "owner": "tbzdevops",
+        "repo": "praxis-day12",
+        "branch": "main"
+      },
+      "available_from": "2026-08-23T22:00:00Z",
+      "available_from_meta": {
+        "input": "2026-08-24T00:00:00",
+        "zone": "Europe/Zurich",
+        "offset": "+02:00",
+        "source": "auto-detected"
+      },
+      "max_group_size": 3
+    },
+    {
+      "slug": "tag13-praxis",
+      "name": "Tag 13 Praxis — AI in DevOps",
+      "description": "Praxis-Uebungen zu Tag 13: AI-Assisted Development, Spec-Driven Development mit ADR, AI-gestuetztes PR-Feedback in der Pipeline und Prompt Injection.",
+      "mode": "group",
+      "autograder": "default",
+      "feedback_pr": true,
+      "no_autograder": true,
+      "copy_about": true,
+      "copy_topics": true,
+      "template": {
+        "owner": "tbzdevops",
+        "repo": "praxis-day13",
+        "branch": "main"
+      },
+      "available_from": "2026-08-23T22:00:00Z",
+      "available_from_meta": {
+        "input": "2026-08-24T00:00:00",
+        "zone": "Europe/Zurich",
+        "offset": "+02:00",
+        "source": "auto-detected"
+      },
+      "max_group_size": 3
+    },
+    {
+      "slug": "tag15-praxis",
+      "name": "Tag 15 Praxis — Docker Basics",
+      "description": "Praxis-Uebungen zu Tag 15: erster Container, eigenes Image mit Dockerfile und ein Docker-Compose-Stack aus web und redis.",
+      "mode": "group",
+      "autograder": "default",
+      "feedback_pr": true,
+      "no_autograder": true,
+      "copy_about": true,
+      "copy_topics": true,
+      "template": {
+        "owner": "tbzdevops",
+        "repo": "praxis-day15",
+        "branch": "main"
+      },
+      "available_from": "2026-08-23T22:00:00Z",
+      "available_from_meta": {
+        "input": "2026-08-24T00:00:00",
+        "zone": "Europe/Zurich",
+        "offset": "+02:00",
+        "source": "auto-detected"
+      },
+      "max_group_size": 3
+    },
+    {
+      "slug": "tag16-praxis",
+      "name": "Tag 16 Praxis — Container-Automatisierung",
+      "description": "Praxis-Uebungen zu Tag 16: CI-Build fuer Container, Image-Push zu AWS ECR und Continuous Deployment auf AWS ECS.",
+      "mode": "group",
+      "autograder": "default",
+      "feedback_pr": true,
+      "no_autograder": true,
+      "copy_about": true,
+      "copy_topics": true,
+      "template": {
+        "owner": "tbzdevops",
+        "repo": "praxis-day16",
+        "branch": "main"
+      },
+      "available_from": "2026-08-23T22:00:00Z",
+      "available_from_meta": {
+        "input": "2026-08-24T00:00:00",
+        "zone": "Europe/Zurich",
+        "offset": "+02:00",
+        "source": "auto-detected"
+      },
+      "max_group_size": 3
     }
   ]
 }
