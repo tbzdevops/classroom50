@@ -28,7 +28,7 @@
     },
     {
       "slug": "day04",
-      "name": "Tag 04 — CI Grundlagen und GitHub CI",
+      "name": "Tag 04 Projekt — CI Grundlagen und GitHub CI",
       "description": "Startpunkt: Stand nach Tag 3. Baue eine CI-Pipeline mit GitHub Actions auf (Workflow, Trigger, Abhaengigkeiten), ergaenze Unit- und Integrationstests und integriere einen Linter. Die Abnahmekriterien pruefen .github/workflows/, tests/ und requirements.txt.",
       "mode": "group",
       "autograder": "default",
@@ -52,7 +52,7 @@
     },
     {
       "slug": "day12",
-      "name": "Tag 12 — DevSecOps",
+      "name": "Tag 12 Projekt — DevSecOps",
       "description": "Startpunkt: Stand nach Tag 11. Die Abnahmekriterien pruefen aktuell Skalierungs- und Performance-Dokumentation (SCALING.md / PERFORMANCE.md / docs/) inklusive dokumentiertem Lasttest.",
       "mode": "group",
       "autograder": "default",
@@ -76,7 +76,7 @@
     },
     {
       "slug": "day13",
-      "name": "Tag 13 — AI in DevOps",
+      "name": "Tag 13 Projekt — AI in DevOps",
       "description": "Startpunkt: Stand nach Tag 12. Integriere AI in die Pipeline (.github/workflows/*ai*.yml) und dokumentiere die Reflexion in AI_INTEGRATION.md.",
       "mode": "group",
       "autograder": "default",
@@ -100,7 +100,7 @@
     },
     {
       "slug": "day15",
-      "name": "Tag 15 — Container Teil 1",
+      "name": "Tag 15 Projekt — Container Teil 1",
       "description": "Startpunkt: Stand nach Tag 14. Baue eine Container-Pipeline (container*.yml / build*.yml / docker*.yml) mit Image-Build und Registry-Push oder Image-Scanning.",
       "mode": "group",
       "autograder": "default",
@@ -124,7 +124,7 @@
     },
     {
       "slug": "day16",
-      "name": "Tag 16 — Container Teil 2",
+      "name": "Tag 16 Projekt — Container Teil 2",
       "description": "Startpunkt: Stand nach Tag 15. Sammelcheck ueber Monitoring (Tag 9-10), Security-Workflow (Tag 11), Dockerfile (Tag 14) und Container-Pipeline (Tag 15).",
       "mode": "group",
       "autograder": "default",
