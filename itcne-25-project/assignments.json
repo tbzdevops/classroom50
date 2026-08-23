@@ -31,6 +31,7 @@
       "autograder": "default",
       "feedback_pr": true,
       "no_autograder": true,
+      "include_all_branches": true,
       "copy_about": true,
       "copy_topics": true,
       "template": {
