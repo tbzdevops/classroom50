@@ -4,7 +4,7 @@
     {
       "slug": "day04",
       "name": "Tag 04 Projekt — CI Grundlagen und GitHub CI",
-      "description": "Startpunkt: Stand nach Tag 3. Baue eine CI-Pipeline mit GitHub Actions auf (Workflow, Trigger, Abhaengigkeiten), ergaenze Unit- und Integrationstests und integriere einen Linter. Die Abnahmekriterien pruefen .github/workflows/, tests/ und requirements.txt.",
+      "description": "Startpunkt: Stand nach Tag 3. Baue eine CI-Pipeline mit GitHub Actions auf (Workflow, Trigger, Abhängigkeiten), ergänze Unit- und Integrationstests und integriere einen Linter. Die Abnahmekriterien prüfen .github/workflows/, tests/ und requirements.txt.",
       "mode": "group",
       "autograder": "default",
       "feedback_pr": true,
@@ -28,7 +28,7 @@
     {
       "slug": "day12",
       "name": "Tag 12 Projekt — DevSecOps",
-      "description": "Startpunkt: Stand nach Tag 11. Die Abnahmekriterien pruefen aktuell Skalierungs- und Performance-Dokumentation (SCALING.md / PERFORMANCE.md / docs/) inklusive dokumentiertem Lasttest.",
+      "description": "Startpunkt: Stand nach Tag 11. Die Abnahmekriterien prüfen aktuell Skalierungs- und Performance-Dokumentation (SCALING.md / PERFORMANCE.md / docs/) inklusive dokumentiertem Lasttest.",
       "mode": "group",
       "autograder": "default",
       "feedback_pr": true,
@@ -100,7 +100,7 @@
     {
       "slug": "day16",
       "name": "Tag 16 Projekt — Container Teil 2",
-      "description": "Startpunkt: Stand nach Tag 15. Sammelcheck ueber Monitoring (Tag 9-10), Security-Workflow (Tag 11), Dockerfile (Tag 14) und Container-Pipeline (Tag 15).",
+      "description": "Startpunkt: Stand nach Tag 15. Sammelcheck über Monitoring (Tag 9-10), Security-Workflow (Tag 11), Dockerfile (Tag 14) und Container-Pipeline (Tag 15).",
       "mode": "group",
       "autograder": "default",
       "feedback_pr": true,
@@ -124,7 +124,7 @@
     {
       "slug": "tag04-praxis",
       "name": "Tag 04 Praxis — CI Grundlagen mit GitHub Actions",
-      "description": "Praxis-Uebungen zu Tag 4: Hello-CI-Workflow, automatisierter Build mit pytest und (optional) Linter plus Docker-Build. Das Repository enthaelt nur das Ordnergeruest — jede Datei schreibst du selbst.",
+      "description": "Praxis-Übungen zu Tag 4: Hello-CI-Workflow, automatisierter Build mit pytest und (optional) Linter plus Docker-Build. Das Repository enthält nur das Ordnergerüst — jede Datei schreibst du selbst.",
       "mode": "group",
       "autograder": "default",
       "feedback_pr": true,
@@ -148,7 +148,7 @@
     {
       "slug": "tag05-praxis",
       "name": "Tag 05 Praxis — Vertrauenswürdige Pipelines",
-      "description": "Praxis-Uebungen zu Tag 5: vier absichtlich kaputte GitHub-Actions-Workflows reparieren (Broken Pipeline Challenge), aus der reparierten Pipeline ein PR-Gate mit CODEOWNERS und PR-Template bauen und es mit Caching, Parallelisierung und concurrency messbar schneller machen. Das Repository enthaelt die kaputten Workflows bereits — das ist Absicht.",
+      "description": "Praxis-Übungen zu Tag 5: vier absichtlich kaputte GitHub-Actions-Workflows reparieren (Broken Pipeline Challenge), aus der reparierten Pipeline ein PR-Gate mit CODEOWNERS und PR-Template bauen und es mit Caching, Parallelisierung und concurrency messbar schneller machen. Das Repository enthält die kaputten Workflows bereits — das ist Absicht.",
       "mode": "group",
       "autograder": "default",
       "feedback_pr": true,
@@ -172,7 +172,7 @@
     {
       "slug": "tag12-praxis",
       "name": "Tag 12 Praxis — DevSecOps",
-      "description": "Praxis-Uebungen zu Tag 12: statische Analyse mit Snyk (SAST/SCA), dynamischer Test mit OWASP ZAP (DAST) an der DSVPWA-App und die Automatisierung beider Scans in GitHub Actions.",
+      "description": "Praxis-Übungen zu Tag 12: statische Analyse mit Snyk (SAST/SCA), dynamischer Test mit OWASP ZAP (DAST) an der DSVPWA-App und die Automatisierung beider Scans in GitHub Actions.",
       "mode": "group",
       "autograder": "default",
       "feedback_pr": true,
@@ -196,7 +196,7 @@
     {
       "slug": "tag13-praxis",
       "name": "Tag 13 Praxis — AI in DevOps",
-      "description": "Praxis-Uebungen zu Tag 13: AI-Assisted Development, Spec-Driven Development mit ADR, AI-gestuetztes PR-Feedback in der Pipeline und Prompt Injection.",
+      "description": "Praxis-Übungen zu Tag 13: AI-Assisted Development, Spec-Driven Development mit ADR, AI-gestütztes PR-Feedback in der Pipeline und Prompt Injection.",
       "mode": "group",
       "autograder": "default",
       "feedback_pr": true,
@@ -220,7 +220,7 @@
     {
       "slug": "tag15-praxis",
       "name": "Tag 15 Praxis — Docker Basics",
-      "description": "Praxis-Uebungen zu Tag 15: erster Container, eigenes Image mit Dockerfile und ein Docker-Compose-Stack aus web und redis.",
+      "description": "Praxis-Übungen zu Tag 15: erster Container, eigenes Image mit Dockerfile und ein Docker-Compose-Stack aus web und redis.",
       "mode": "group",
       "autograder": "default",
       "feedback_pr": true,
@@ -244,7 +244,7 @@
     {
       "slug": "tag16-praxis",
       "name": "Tag 16 Praxis — Container-Automatisierung",
-      "description": "Praxis-Uebungen zu Tag 16: CI-Build fuer Container, Image-Push zu AWS ECR und Continuous Deployment auf AWS ECS.",
+      "description": "Praxis-Übungen zu Tag 16: CI-Build für Container, Image-Push zu AWS ECR und Continuous Deployment auf AWS ECS.",
       "mode": "group",
       "autograder": "default",
       "feedback_pr": true,
