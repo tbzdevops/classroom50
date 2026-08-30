@@ -2,30 +2,6 @@
   "schema": "classroom50/assignments/v1",
   "assignments": [
     {
-      "slug": "day16",
-      "name": "Tag 16 Projekt — Container Teil 2",
-      "description": "Startpunkt: Stand nach Tag 15. Sammelcheck über Monitoring (Tag 9-10), Security-Workflow (Tag 11), Dockerfile (Tag 14) und Container-Pipeline (Tag 15).",
-      "mode": "group",
-      "autograder": "default",
-      "feedback_pr": true,
-      "no_autograder": true,
-      "copy_about": true,
-      "copy_topics": true,
-      "template": {
-        "owner": "tbzdevops",
-        "repo": "techstyle-day16",
-        "branch": "main"
-      },
-      "available_from": "2026-08-23T21:30:00Z",
-      "available_from_meta": {
-        "input": "2026-08-23T23:30:00",
-        "zone": "Europe/Zurich",
-        "offset": "+02:00",
-        "source": "auto-detected"
-      },
-      "max_group_size": 3
-    },
-    {
       "slug": "tag04-praxis",
       "name": "Tag 04 Praxis — CI Grundlagen mit GitHub Actions",
       "description": "Praxis-Übungen zu Tag 4: Hello-CI-Workflow, automatisierter Build mit pytest und (optional) Linter plus Docker-Build. Das Repository enthält nur das Ordnergerüst — jede Datei schreibst du selbst.",
@@ -257,6 +233,31 @@
       "template": {
         "owner": "tbzdevops",
         "repo": "techstyle-day15",
+        "branch": "main"
+      },
+      "available_from": "2026-08-23T21:30:00Z",
+      "available_from_meta": {
+        "input": "2026-08-23T23:30:00",
+        "zone": "Europe/Zurich",
+        "offset": "+02:00",
+        "source": "auto-detected"
+      },
+      "max_group_size": 3,
+      "locked": true
+    },
+    {
+      "slug": "day16",
+      "name": "Tag 16 Projekt — Container Teil 2",
+      "description": "Startpunkt: Stand nach Tag 15. Sammelcheck über Monitoring (Tag 9-10), Security-Workflow (Tag 11), Dockerfile (Tag 14) und Container-Pipeline (Tag 15).",
+      "mode": "group",
+      "autograder": "default",
+      "feedback_pr": true,
+      "no_autograder": true,
+      "copy_about": true,
+      "copy_topics": true,
+      "template": {
+        "owner": "tbzdevops",
+        "repo": "techstyle-day16",
         "branch": "main"
       },
       "available_from": "2026-08-23T21:30:00Z",
