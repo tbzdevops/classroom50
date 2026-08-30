@@ -2,30 +2,6 @@
   "schema": "classroom50/assignments/v1",
   "assignments": [
     {
-      "slug": "day15",
-      "name": "Tag 15 Projekt — Container Teil 1",
-      "description": "Startpunkt: Stand nach Tag 14. Baue eine Container-Pipeline (container*.yml / build*.yml / docker*.yml) mit Image-Build und Registry-Push oder Image-Scanning.",
-      "mode": "group",
-      "autograder": "default",
-      "feedback_pr": true,
-      "no_autograder": true,
-      "copy_about": true,
-      "copy_topics": true,
-      "template": {
-        "owner": "tbzdevops",
-        "repo": "techstyle-day15",
-        "branch": "main"
-      },
-      "available_from": "2026-08-23T21:30:00Z",
-      "available_from_meta": {
-        "input": "2026-08-23T23:30:00",
-        "zone": "Europe/Zurich",
-        "offset": "+02:00",
-        "source": "auto-detected"
-      },
-      "max_group_size": 3
-    },
-    {
       "slug": "day16",
       "name": "Tag 16 Projekt — Container Teil 2",
       "description": "Startpunkt: Stand nach Tag 15. Sammelcheck über Monitoring (Tag 9-10), Security-Workflow (Tag 11), Dockerfile (Tag 14) und Container-Pipeline (Tag 15).",
@@ -256,6 +232,31 @@
       "template": {
         "owner": "tbzdevops",
         "repo": "techstyle-day13",
+        "branch": "main"
+      },
+      "available_from": "2026-08-23T21:30:00Z",
+      "available_from_meta": {
+        "input": "2026-08-23T23:30:00",
+        "zone": "Europe/Zurich",
+        "offset": "+02:00",
+        "source": "auto-detected"
+      },
+      "max_group_size": 3,
+      "locked": true
+    },
+    {
+      "slug": "day15",
+      "name": "Tag 15 Projekt — Container Teil 1",
+      "description": "Startpunkt: Stand nach Tag 14. Baue eine Container-Pipeline (container*.yml / build*.yml / docker*.yml) mit Image-Build und Registry-Push oder Image-Scanning.",
+      "mode": "group",
+      "autograder": "default",
+      "feedback_pr": true,
+      "no_autograder": true,
+      "copy_about": true,
+      "copy_topics": true,
+      "template": {
+        "owner": "tbzdevops",
+        "repo": "techstyle-day15",
         "branch": "main"
       },
       "available_from": "2026-08-23T21:30:00Z",
