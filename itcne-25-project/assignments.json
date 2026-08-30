@@ -2,30 +2,6 @@
   "schema": "classroom50/assignments/v1",
   "assignments": [
     {
-      "slug": "day13",
-      "name": "Tag 13 Projekt — AI in DevOps",
-      "description": "Startpunkt: Stand nach Tag 12. Integriere AI in die Pipeline (.github/workflows/*ai*.yml) und dokumentiere die Reflexion in AI_INTEGRATION.md.",
-      "mode": "group",
-      "autograder": "default",
-      "feedback_pr": true,
-      "no_autograder": true,
-      "copy_about": true,
-      "copy_topics": true,
-      "template": {
-        "owner": "tbzdevops",
-        "repo": "techstyle-day13",
-        "branch": "main"
-      },
-      "available_from": "2026-08-23T21:30:00Z",
-      "available_from_meta": {
-        "input": "2026-08-23T23:30:00",
-        "zone": "Europe/Zurich",
-        "offset": "+02:00",
-        "source": "auto-detected"
-      },
-      "max_group_size": 3
-    },
-    {
       "slug": "day15",
       "name": "Tag 15 Projekt — Container Teil 1",
       "description": "Startpunkt: Stand nach Tag 14. Baue eine Container-Pipeline (container*.yml / build*.yml / docker*.yml) mit Image-Build und Registry-Push oder Image-Scanning.",
@@ -255,6 +231,31 @@
       "template": {
         "owner": "tbzdevops",
         "repo": "techstyle-day12",
+        "branch": "main"
+      },
+      "available_from": "2026-08-23T21:30:00Z",
+      "available_from_meta": {
+        "input": "2026-08-23T23:30:00",
+        "zone": "Europe/Zurich",
+        "offset": "+02:00",
+        "source": "auto-detected"
+      },
+      "max_group_size": 3,
+      "locked": true
+    },
+    {
+      "slug": "day13",
+      "name": "Tag 13 Projekt — AI in DevOps",
+      "description": "Startpunkt: Stand nach Tag 12. Integriere AI in die Pipeline (.github/workflows/*ai*.yml) und dokumentiere die Reflexion in AI_INTEGRATION.md.",
+      "mode": "group",
+      "autograder": "default",
+      "feedback_pr": true,
+      "no_autograder": true,
+      "copy_about": true,
+      "copy_topics": true,
+      "template": {
+        "owner": "tbzdevops",
+        "repo": "techstyle-day13",
         "branch": "main"
       },
       "available_from": "2026-08-23T21:30:00Z",
