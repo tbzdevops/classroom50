@@ -2,30 +2,6 @@
   "schema": "classroom50/assignments/v1",
   "assignments": [
     {
-      "slug": "day04",
-      "name": "Tag 04 Projekt — CI Grundlagen und GitHub CI",
-      "description": "Startpunkt: Stand nach Tag 3. Baue eine CI-Pipeline mit GitHub Actions auf (Workflow, Trigger, Abhängigkeiten), ergänze Unit- und Integrationstests und integriere einen Linter. Die Abnahmekriterien prüfen .github/workflows/, tests/ und requirements.txt.",
-      "mode": "group",
-      "autograder": "default",
-      "feedback_pr": true,
-      "no_autograder": true,
-      "copy_about": true,
-      "copy_topics": true,
-      "template": {
-        "owner": "tbzdevops",
-        "repo": "techstyle-day04",
-        "branch": "main"
-      },
-      "available_from": "2026-08-23T21:30:00Z",
-      "available_from_meta": {
-        "input": "2026-08-23T23:30:00",
-        "zone": "Europe/Zurich",
-        "offset": "+02:00",
-        "source": "auto-detected"
-      },
-      "max_group_size": 3
-    },
-    {
       "slug": "day12",
       "name": "Tag 12 Projekt — DevSecOps",
       "description": "Startpunkt: Stand nach Tag 11. Die Abnahmekriterien prüfen aktuell Skalierungs- und Performance-Dokumentation (SCALING.md / PERFORMANCE.md / docs/) inklusive dokumentiertem Lasttest.",
@@ -264,6 +240,31 @@
         "source": "auto-detected"
       },
       "max_group_size": 3
+    },
+    {
+      "slug": "day04",
+      "name": "Tag 04 Projekt — CI Grundlagen und GitHub CI",
+      "description": "Startpunkt: Stand nach Tag 3. Baue eine CI-Pipeline mit GitHub Actions auf (Workflow, Trigger, Abhängigkeiten), ergänze Unit- und Integrationstests und integriere einen Linter. Die Abnahmekriterien prüfen .github/workflows/, tests/ und requirements.txt.",
+      "mode": "group",
+      "autograder": "default",
+      "feedback_pr": true,
+      "no_autograder": true,
+      "copy_about": true,
+      "copy_topics": true,
+      "template": {
+        "owner": "tbzdevops",
+        "repo": "techstyle-day04",
+        "branch": "main"
+      },
+      "available_from": "2026-08-23T21:30:00Z",
+      "available_from_meta": {
+        "input": "2026-08-23T23:30:00",
+        "zone": "Europe/Zurich",
+        "offset": "+02:00",
+        "source": "auto-detected"
+      },
+      "max_group_size": 3,
+      "locked": true
     }
   ]
 }
