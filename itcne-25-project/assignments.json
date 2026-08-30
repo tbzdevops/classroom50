@@ -146,6 +146,30 @@
       "max_group_size": 3
     },
     {
+      "slug": "tag05-praxis",
+      "name": "Tag 05 Praxis — Vertrauenswürdige Pipelines",
+      "description": "Praxis-Uebungen zu Tag 5: vier absichtlich kaputte GitHub-Actions-Workflows reparieren (Broken Pipeline Challenge), aus der reparierten Pipeline ein PR-Gate mit CODEOWNERS und PR-Template bauen und es mit Caching, Parallelisierung und concurrency messbar schneller machen. Das Repository enthaelt die kaputten Workflows bereits — das ist Absicht.",
+      "mode": "group",
+      "autograder": "default",
+      "feedback_pr": true,
+      "no_autograder": true,
+      "copy_about": true,
+      "copy_topics": true,
+      "template": {
+        "owner": "tbzdevops",
+        "repo": "praxis-day05",
+        "branch": "main"
+      },
+      "available_from": "2026-08-30T06:00:00Z",
+      "available_from_meta": {
+        "input": "2026-08-30T08:00:00",
+        "zone": "Europe/Zurich",
+        "offset": "+02:00",
+        "source": "auto-detected"
+      },
+      "max_group_size": 3
+    },
+    {
       "slug": "tag12-praxis",
       "name": "Tag 12 Praxis — DevSecOps",
       "description": "Praxis-Uebungen zu Tag 12: statische Analyse mit Snyk (SAST/SCA), dynamischer Test mit OWASP ZAP (DAST) an der DSVPWA-App und die Automatisierung beider Scans in GitHub Actions.",
