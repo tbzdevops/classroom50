@@ -88,6 +88,12 @@ TESTS_SCHEMA_V1 = "classroom50/tests/v1"
 # commands are each bounded by it independently.
 DEFAULT_TEST_TIMEOUT = 10
 
+# Env var handed to every setup/run command and autograder.py: the absolute
+# path of the extracted per-assignment bundle. Commands run with cwd at the
+# student checkout, so this is the only way a declarative test can reach a
+# teacher-only script or fixture that must stay out of the template.
+BUNDLE_DIR_ENV = "CLASSROOM50_BUNDLE_DIR"
+
 # Cap captured stdout/stderr in the release body so a runaway program can't
 # bloat the published release.
 MAX_CAPTURED_CHARS = 2000
@@ -318,7 +324,8 @@ def make_result(
     review_link is None.
 
     `username` is the repo OWNER, emitted as `owner` (the identity anchor
-    the collector validates). `assignment_type` ("individual"|"group")
+    the collector validates; for a team assignment the repo-name tail
+    `group-<n>`). `assignment_type` ("individual"|"group"|"team")
     records the mode. No `usernames` field: who pushed is `submitted_by`,
     who owns the repo is `owner`, the credited member list is resolved by
     collection.
@@ -436,6 +443,7 @@ def render_release_body(result: dict[str, Any], summary: str) -> str:
 
 def validate_result(
     data: Any, *, classroom: str, assignment: str, is_group: bool = False,
+    expected_type: str | None = None,
     owner: str | None = None,
 ) -> str | None:
     """None if `data` is v1-shaped for the given identity, else a
@@ -448,9 +456,11 @@ def validate_result(
     — the student appears not-yet-submitted with no signal in the log.
 
     `owner` (repo owner login) is the identity anchor: when provided it must
-    equal `data["owner"]`. `assignment_type` must be "individual"/"group" and
-    match the run's mode. No `usernames` field: who pushed is `submitted_by`,
-    who owns is `owner`, the credited member list is resolved by collection.
+    equal `data["owner"]`. `assignment_type` must equal the run's
+    `expected_type` ("individual"/"group"/"team"); the legacy `is_group`
+    boolean is honored when `expected_type` is not supplied. No `usernames`
+    field: who pushed is `submitted_by`, who owns is `owner`, the credited
+    member list is resolved by collection.
     """
     if not isinstance(data, dict):
         return f"{RESULT_FILENAME} is not a JSON object"
@@ -476,7 +486,8 @@ def validate_result(
             f"(derived from the repo name)"
         )
 
-    expected_type = "group" if is_group else "individual"
+    if expected_type is None:
+        expected_type = "group" if is_group else "individual"
     assignment_type = data.get("assignment_type")
     if assignment_type != expected_type:
         return (
@@ -1404,6 +1415,19 @@ def mode_is_group(mode: str | None) -> bool:
     return (mode or "").strip().lower() == "group"
 
 
+def assignment_type_for_mode(mode: str | None) -> str:
+    """Map the MODE env (the manifest mode, via the setup job) to the
+    result.json assignment_type: 'group' and 'team' pass through verbatim;
+    anything else — None, '', or unrecognized — is individual, the strictest
+    type, so a missing/typo'd MODE can never loosen validation. Keep the
+    accepted set in lockstep with the setup job's mode allow-list and
+    collect_scores.py's normalize_assignment_type."""
+    normalized = (mode or "").strip().lower()
+    if normalized in ("group", "team"):
+        return normalized
+    return "individual"
+
+
 # ---------------------------------------------------------------------------
 # Error finalizer
 # ---------------------------------------------------------------------------
@@ -1615,14 +1639,23 @@ def _resolve_expected(spec: dict[str, Any], fixtures_dir: pathlib.Path) -> str:
     return spec.get("expected") or ""
 
 
+def _command_env(bundle_dir: pathlib.Path | None) -> dict[str, str]:
+    env = dict(os.environ)
+    if bundle_dir is not None:
+        env[BUNDLE_DIR_ENV] = str(bundle_dir.resolve())
+    return env
+
+
 def _run_command(command: str, cwd: pathlib.Path, timeout: int,
-                 stdin: str = "") -> subprocess.CompletedProcess[str]:
+                 stdin: str = "",
+                 bundle_dir: pathlib.Path | None = None) -> subprocess.CompletedProcess[str]:
     """Run a shell command in the student checkout with captured text output
     and an empty-by-default stdin."""
     return subprocess.run(
         command,
         shell=True,
         cwd=str(cwd),
+        env=_command_env(bundle_dir),
         input=stdin,
         capture_output=True,
         text=True,
@@ -1632,14 +1665,15 @@ def _run_command(command: str, cwd: pathlib.Path, timeout: int,
     )
 
 
-def _run_setup(setup: str, cwd: pathlib.Path,
-               timeout: int) -> tuple[str | None, subprocess.CompletedProcess[str] | None]:
+def _run_setup(setup: str, cwd: pathlib.Path, timeout: int,
+               bundle_dir: pathlib.Path | None = None,
+               ) -> tuple[str | None, subprocess.CompletedProcess[str] | None]:
     """Run a test's setup command. Returns (error-summary, process): the
     summary is None on success; the process is None when the command never
     produced one (timeout / failed start). Captured streams travel back raw so
     the renderers can clip and policy-filter them per surface."""
     try:
-        sp = _run_command(setup, cwd, timeout)
+        sp = _run_command(setup, cwd, timeout, bundle_dir=bundle_dir)
     except subprocess.TimeoutExpired:
         return f"setup timed out after {timeout}s", None
     except OSError as exc:
@@ -1675,7 +1709,8 @@ def _ensure_pytest(cwd: pathlib.Path, timeout: int) -> None:
 
 
 def _grade_python(spec: dict[str, Any], cwd: pathlib.Path, timeout: int,
-                  points: int, name: str) -> dict[str, Any]:
+                  points: int, name: str,
+                  bundle_dir: pathlib.Path | None = None) -> dict[str, Any]:
     """Split `points` across cases via pytest-json-report (deps auto-installed
     by _ensure_pytest), falling back to exit-code scoring when no report."""
     _ensure_pytest(cwd, timeout)
@@ -1688,7 +1723,7 @@ def _grade_python(spec: dict[str, Any], cwd: pathlib.Path, timeout: int,
     else:
         cmd = f"{spec['run']} --json-report --json-report-file={shlex.quote(str(report))}"
     try:
-        rp = _run_command(cmd, cwd, timeout)
+        rp = _run_command(cmd, cwd, timeout, bundle_dir=bundle_dir)
     except subprocess.TimeoutExpired:
         shutil.rmtree(report_dir, ignore_errors=True)
         return _make_outcome(name, points, False, f"timed out after {timeout}s")
@@ -1743,7 +1778,7 @@ def execute_test(spec: dict[str, Any], *, cwd: pathlib.Path,
     setup_capture: dict[str, str] = {}
     setup = spec.get("setup") or ""
     if setup:
-        err, sp = _run_setup(setup, cwd, timeout)
+        err, sp = _run_setup(setup, cwd, timeout, bundle_dir=fixtures_dir)
         if sp is not None:
             setup_capture = {k: v for k, v in
                              (("setup-stdout", sp.stdout), ("setup-stderr", sp.stderr)) if v}
@@ -1771,7 +1806,7 @@ def _execute_spec(spec: dict[str, Any], *, cwd: pathlib.Path,
     """Run the spec's `run` phase (setup already done) and grade it."""
     ttype = spec["type"]
     if ttype == TEST_TYPE_PYTHON:
-        outcome = _grade_python(spec, cwd, timeout, points, name)
+        outcome = _grade_python(spec, cwd, timeout, points, name, bundle_dir=fixtures_dir)
         if not outcome["passed"]:
             outcome.setdefault("failure-kind", "cases")
         return outcome
@@ -1782,7 +1817,7 @@ def _execute_spec(spec: dict[str, Any], *, cwd: pathlib.Path,
         return _make_outcome(name, points, False, str(exc))
 
     try:
-        rp = _run_command(spec["run"], cwd, timeout, stdin=stdin)
+        rp = _run_command(spec["run"], cwd, timeout, stdin=stdin, bundle_dir=fixtures_dir)
     except subprocess.TimeoutExpired:
         return _make_outcome(name, points, False, f"timed out after {timeout}s")
     except OSError as exc:
@@ -1879,17 +1914,36 @@ def _validate_test_defaults(d: Any) -> str | None:
     return None
 
 
+# publish-pages always materializes a well-formed envelope, so a structurally
+# wrong tests.json means a teacher committed one by hand under
+# <classroom>/autograders/<slug>/ (see discussion #805). Point them back to the
+# supported authoring path instead of describing a format they never write.
+HAND_WRITTEN_TESTS_HINT = (
+    "Declarative tests are stored on the assignment and tests.json is generated "
+    "from them when the classroom50 repository publishes. Remove the tests.json "
+    "you committed under CLASSROOM/autograders/ASSIGNMENT/ and add the tests "
+    "with the web assignment form or `gh teacher assignment test add` instead.")
+
+
 def load_tests(path: pathlib.Path) -> list[dict[str, Any]]:
     """Parse + re-validate a materialized tests.json, folding the envelope's
     `defaults` (assignment-level failure-details / show-output) into each spec
     that doesn't set its own. Raises TestsConfigError on any structural
     problem."""
     data = json.loads(path.read_text(encoding="utf-8"))
+    if isinstance(data, list):
+        # The predictable mistake: the bare array `gh teacher assignment add
+        # --tests` accepts, copied from the wiki into the bundle directory.
+        raise TestsConfigError(
+            f"{TESTS_FILENAME} is a bare test array, the `--tests` file format, "
+            f"not the generated bundle format. {HAND_WRITTEN_TESTS_HINT}")
     if not isinstance(data, dict):
-        raise TestsConfigError(f"{TESTS_FILENAME} is not a JSON object")
+        raise TestsConfigError(
+            f"{TESTS_FILENAME} is not a JSON object. {HAND_WRITTEN_TESTS_HINT}")
     if data.get("schema") != TESTS_SCHEMA_V1:
         raise TestsConfigError(
-            f"{TESTS_FILENAME} schema is {data.get('schema')!r}, want {TESTS_SCHEMA_V1!r}")
+            f"{TESTS_FILENAME} schema is {data.get('schema')!r}, want {TESTS_SCHEMA_V1!r}. "
+            f"{HAND_WRITTEN_TESTS_HINT}")
     tests = data.get("tests")
     if not isinstance(tests, list) or not tests:
         raise TestsConfigError(f"{TESTS_FILENAME} 'tests' must be a non-empty list")
@@ -2193,7 +2247,10 @@ def run_declarative(tests_path: pathlib.Path, finalize: Finalizer,
     never fails the runner."""
     try:
         tests = load_tests(tests_path)
-    except (json.JSONDecodeError, TestsConfigError, OSError) as exc:
+    except TestsConfigError as exc:
+        # Already names the file and says what to do next.
+        return finalize.error(str(exc))
+    except (json.JSONDecodeError, OSError) as exc:
         return finalize.error(f"{TESTS_FILENAME}: {exc}")
 
     grader = DeclarativeGrader(
@@ -2222,7 +2279,7 @@ def run_declarative(tests_path: pathlib.Path, finalize: Finalizer,
     # keeps parity with collect_scores ingest and catches drift early.
     err = validate_result(
         result, classroom=finalize.classroom, assignment=finalize.assignment,
-        is_group=(finalize.assignment_type == "group"), owner=finalize.username,
+        expected_type=finalize.assignment_type, owner=finalize.username,
     )
     if err is not None:
         return finalize.error(f"declarative grader produced invalid result: {err}")
@@ -2324,15 +2381,25 @@ def resolve_entrypoint(
 
 def run_entrypoint(
     finalize: Finalizer, entrypoint: pathlib.Path, workspace: pathlib.Path,
+    *, bundle_dir: pathlib.Path | None = None,
 ) -> int | None:
     """Exec the entrypoint with the helper env vars and cwd at the student's
     checkout. Returns an rc (already finalized as an error) on a failed
     invocation or a non-zero autograder exit, else None to continue.
 
+    `bundle_dir` is where fetch_bundle extracted the per-assignment bundle. It
+    is what CLASSROOM50_BUNDLE_DIR names, even for the classroom DEFAULT
+    entrypoint (written beside it, not inside it), so a default autograder.py
+    can still reach a bundle that ships only fixtures. With no bundle (a 404,
+    or nothing extracted) the entrypoint's own directory is the fallback.
+
     The USERNAME / *_URL helper env vars are read off `finalize` (the identity
     carrier), matching run_declarative, rather than re-threading them through
     the signature."""
     env = dict(os.environ)
+    if bundle_dir is None or not bundle_dir.is_dir():
+        bundle_dir = entrypoint.parent
+    env[BUNDLE_DIR_ENV] = str(bundle_dir.resolve())
     env["USERNAME"] = finalize.username
     env["OWNER"] = finalize.username
     env["ASSIGNMENT_TYPE"] = finalize.assignment_type
@@ -2353,12 +2420,12 @@ def run_entrypoint(
     return None
 
 
-def finalize_result(finalize: Finalizer, *, is_group: bool) -> int:
+def finalize_result(finalize: Finalizer) -> int:
     """Read + validate the autograder's result.json, then synthesize the release
     body and status/summary outputs it didn't write. Returns the runner's exit
     code (0 on success; an error rc when the result is missing/malformed/invalid).
-    Identity/paths are read off `finalize`; `is_group` is the one stage-local
-    input (it drives the `assignment_type` check in validate_result)."""
+    Identity/paths — including the expected `assignment_type` — are read off
+    `finalize`."""
     workspace = finalize.workspace
     github_output = finalize.github_output
     result_path = workspace / RESULT_FILENAME
@@ -2394,7 +2461,7 @@ def finalize_result(finalize: Finalizer, *, is_group: bool) -> int:
 
     err = validate_result(
         result, classroom=finalize.classroom, assignment=finalize.assignment,
-        is_group=is_group, owner=finalize.username,
+        expected_type=finalize.assignment_type, owner=finalize.username,
     )
     if err is not None:
         return finalize.error(err)
@@ -2485,9 +2552,9 @@ def main() -> int:
     server_url = os.environ.get("GITHUB_SERVER_URL", "https://github.com")
     actor = os.environ.get("GITHUB_ACTOR", "")
     # Assignment mode flows from assignments.json via the setup job's `mode`
-    # output. Unknown/missing defaults to individual (the stricter
+    # output. Unknown/missing defaults to individual (the strictest
     # `assignment_type`) so a missing env can't loosen validation.
-    is_group = mode_is_group(os.environ.get("MODE"))
+    assignment_type = assignment_type_for_mode(os.environ.get("MODE"))
     github_output = os.environ.get("GITHUB_OUTPUT")
     workspace = pathlib.Path.cwd()
 
@@ -2540,7 +2607,7 @@ def main() -> int:
         release_link=release_link,
         review_link=review_link,
         submitted_by=actor_identity(),
-        assignment_type="group" if is_group else "individual",
+        assignment_type=assignment_type,
         submitted_at=submitted_at,
     )
 
@@ -2576,11 +2643,13 @@ def main() -> int:
         if entrypoint is None:
             return rc  # declarative grader ran, vacuous pass, or fetch error
 
-        rc = run_entrypoint(finalize, entrypoint, workspace)
+        rc = run_entrypoint(
+            finalize, entrypoint, workspace, bundle_dir=runtime_dir / assignment,
+        )
         if rc is not None:
             return rc
 
-        return finalize_result(finalize, is_group=is_group)
+        return finalize_result(finalize)
 
     # Append the removed-files note on every exit path (incl. an exception
     # in grading): the files were already deleted before _grade() ran.
