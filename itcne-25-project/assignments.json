@@ -51,8 +51,8 @@
     },
     {
       "slug": "tag12-praxis",
-      "name": "Tag 12 Praxis — DevSecOps",
-      "description": "Praxis-Übungen zu Tag 12: statische Analyse mit Snyk (SAST/SCA), dynamischer Test mit OWASP ZAP (DAST) an der DSVPWA-App und die Automatisierung beider Scans in GitHub Actions.",
+      "name": "Tag 12 Praxis — AI in DevOps",
+      "description": "Praxis-Übungen zu Tag 12: AI-Assisted Development, Spec-Driven Development mit ADR, AI-gestütztes PR-Feedback in der Pipeline und Prompt Injection.",
       "mode": "group",
       "autograder": "default",
       "feedback_pr": true,
@@ -75,8 +75,8 @@
     },
     {
       "slug": "tag13-praxis",
-      "name": "Tag 13 Praxis — AI in DevOps",
-      "description": "Praxis-Übungen zu Tag 13: AI-Assisted Development, Spec-Driven Development mit ADR, AI-gestütztes PR-Feedback in der Pipeline und Prompt Injection.",
+      "name": "Tag 13 Praxis — Docker Basics",
+      "description": "Praxis-Übungen zu Tag 13: erster Container, eigenes Image mit Dockerfile und ein Docker-Compose-Stack aus web und redis.",
       "mode": "group",
       "autograder": "default",
       "feedback_pr": true,
@@ -98,9 +98,9 @@
       "max_group_size": 3
     },
     {
-      "slug": "tag15-praxis",
-      "name": "Tag 15 Praxis — Docker Basics",
-      "description": "Praxis-Übungen zu Tag 15: erster Container, eigenes Image mit Dockerfile und ein Docker-Compose-Stack aus web und redis.",
+      "slug": "tag14-praxis",
+      "name": "Tag 14 Praxis — Container-Automatisierung",
+      "description": "Praxis-Übungen zu Tag 14: CI-Build für Container, Image-Push zu AWS ECR und Continuous Deployment auf AWS ECS.",
       "mode": "group",
       "autograder": "default",
       "feedback_pr": true,
@@ -109,7 +109,7 @@
       "copy_topics": true,
       "template": {
         "owner": "tbzdevops",
-        "repo": "praxis-day15",
+        "repo": "praxis-day14",
         "branch": "main"
       },
       "available_from": "2026-08-23T22:00:00Z",
@@ -122,9 +122,9 @@
       "max_group_size": 3
     },
     {
-      "slug": "tag16-praxis",
-      "name": "Tag 16 Praxis — Container-Automatisierung",
-      "description": "Praxis-Übungen zu Tag 16: CI-Build für Container, Image-Push zu AWS ECR und Continuous Deployment auf AWS ECS.",
+      "slug": "tag15-praxis",
+      "name": "Tag 15 Praxis — DevSecOps",
+      "description": "Praxis-Übungen zu Tag 15: statische Analyse mit Snyk (SAST/SCA), dynamischer Test mit OWASP ZAP (DAST) an der DSVPWA-App und die Automatisierung beider Scans in GitHub Actions.",
       "mode": "group",
       "autograder": "default",
       "feedback_pr": true,
@@ -133,7 +133,7 @@
       "copy_topics": true,
       "template": {
         "owner": "tbzdevops",
-        "repo": "praxis-day16",
+        "repo": "praxis-day15",
         "branch": "main"
       },
       "available_from": "2026-08-23T22:00:00Z",
@@ -172,8 +172,8 @@
     },
     {
       "slug": "day12",
-      "name": "Tag 12 Projekt — DevSecOps",
-      "description": "Startpunkt: Stand nach Tag 11. Die Abnahmekriterien prüfen aktuell Skalierungs- und Performance-Dokumentation (SCALING.md / PERFORMANCE.md / docs/) inklusive dokumentiertem Lasttest.",
+      "name": "Tag 12 Projekt — AI in DevOps",
+      "description": "Startpunkt: Stand nach Tag 11. Integriere AI in die Pipeline (.github/workflows/*ai*.yml) und dokumentiere die Reflexion inklusive Grenzen und Risiken in AI_INTEGRATION.md.",
       "mode": "group",
       "autograder": "default",
       "feedback_pr": true,
@@ -197,8 +197,8 @@
     },
     {
       "slug": "day13",
-      "name": "Tag 13 Projekt — AI in DevOps",
-      "description": "Startpunkt: Stand nach Tag 12. Integriere AI in die Pipeline (.github/workflows/*ai*.yml) und dokumentiere die Reflexion in AI_INTEGRATION.md.",
+      "name": "Tag 13 Projekt — Container Teil 1",
+      "description": "Startpunkt: Stand nach Tag 12. Baue eine Container-Pipeline (container*.yml / build*.yml / docker*.yml) mit Image-Build und Registry-Push oder Image-Scanning.",
       "mode": "group",
       "autograder": "default",
       "feedback_pr": true,
@@ -221,9 +221,9 @@
       "locked": true
     },
     {
-      "slug": "day15",
-      "name": "Tag 15 Projekt — Container Teil 1",
-      "description": "Startpunkt: Stand nach Tag 14. Baue eine Container-Pipeline (container*.yml / build*.yml / docker*.yml) mit Image-Build und Registry-Push oder Image-Scanning.",
+      "slug": "day14",
+      "name": "Tag 14 Projekt — Container Teil 2",
+      "description": "Startpunkt: Stand nach Tag 13. Baue die Deployment-Pipeline: Container-Image bauen, in die Registry (ECR) pushen, mit AWS-Credentials aus GitHub Secrets deployen und die Pipeline in DEPLOYMENT.md dokumentieren.",
       "mode": "group",
       "autograder": "default",
       "feedback_pr": true,
@@ -232,7 +232,7 @@
       "copy_topics": true,
       "template": {
         "owner": "tbzdevops",
-        "repo": "techstyle-day15",
+        "repo": "techstyle-day14",
         "branch": "main"
       },
       "available_from": "2026-08-23T21:30:00Z",
@@ -246,9 +246,9 @@
       "locked": true
     },
     {
-      "slug": "day16",
-      "name": "Tag 16 Projekt — Container Teil 2",
-      "description": "Startpunkt: Stand nach Tag 15. Sammelcheck über Monitoring (Tag 9-10), Security-Workflow (Tag 11), Dockerfile (Tag 14) und Container-Pipeline (Tag 15).",
+      "slug": "day15",
+      "name": "Tag 15 Projekt — DevSecOps",
+      "description": "Startpunkt: Stand nach Tag 14. Baue eine Security-Pipeline (.github/workflows/security-pipeline.yml) mit Snyk (SCA/SAST), Severity-Threshold und SARIF-Upload zu GitHub Code Scanning und dokumentiere die Findings in SECURITY.md.",
       "mode": "group",
       "autograder": "default",
       "feedback_pr": true,
@@ -257,7 +257,7 @@
       "copy_topics": true,
       "template": {
         "owner": "tbzdevops",
-        "repo": "techstyle-day16",
+        "repo": "techstyle-day15",
         "branch": "main"
       },
       "available_from": "2026-08-23T21:30:00Z",
