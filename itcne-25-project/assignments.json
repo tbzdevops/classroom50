@@ -293,6 +293,21 @@
         "source": "auto-detected"
       },
       "max_group_size": 3
+    },
+    {
+      "slug": "tag-07-praxis-sonarqube",
+      "name": "Tag 07 Praxis - Sonarqube",
+      "mode": "individual",
+      "autograder": "default",
+      "feedback_pr": true,
+      "no_autograder": true,
+      "copy_about": true,
+      "copy_topics": true,
+      "template": {
+        "owner": "tbzdevops",
+        "repo": "praxis-day07",
+        "branch": "main"
+      }
     }
   ]
 }
