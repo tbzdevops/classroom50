@@ -308,6 +308,30 @@
         "repo": "praxis-day07",
         "branch": "main"
       }
+    },
+    {
+      "slug": "tag-08-praxis-continuous-deployment",
+      "name": "Tag 08 Praxis - Continuous Deployment",
+      "mode": "group",
+      "autograder": "default",
+      "feedback_pr": true,
+      "no_autograder": true,
+      "include_all_branches": true,
+      "copy_about": true,
+      "copy_topics": true,
+      "template": {
+        "owner": "tbzdevops",
+        "repo": "praxis-day08",
+        "branch": "main"
+      },
+      "available_from": "2026-09-18T16:00:00Z",
+      "available_from_meta": {
+        "input": "2026-09-18T18:00:00",
+        "zone": "Europe/Zurich",
+        "offset": "+02:00",
+        "source": "auto-detected"
+      },
+      "max_group_size": 3
     }
   ]
 }
