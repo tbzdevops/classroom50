@@ -52,7 +52,7 @@
     {
       "slug": "tag12-praxis",
       "name": "Tag 12 Praxis — AI in DevOps",
-      "description": "Praxis-Übungen zu Tag 12: AI-Assisted Development, Spec-Driven Development mit ADR, AI-gestütztes PR-Feedback in der Pipeline und Prompt Injection.",
+      "description": "Praxis-Übungen zu Tag 12 (1 Lektion): Spec-Driven Development mit AI inklusive kritischem Review des AI-Outputs, sowie Prompt Injection — Angriff und Verteidigung.",
       "mode": "group",
       "autograder": "default",
       "feedback_pr": true,
@@ -173,7 +173,7 @@
     {
       "slug": "day12",
       "name": "Tag 12 Projekt — AI in DevOps",
-      "description": "Startpunkt: Stand nach Tag 11. Integriere AI in die Pipeline (.github/workflows/*ai*.yml) und dokumentiere die Reflexion inklusive Grenzen und Risiken in AI_INTEGRATION.md.",
+      "description": "Startpunkt: Stand nach Tag 11. In zwei Lektionen einen AI-Review-Bot bauen: Spec (specs/ai-review.md), Workflow .github/workflows/ai-review.yml mit GitHub Models, Absicherung gegen Prompt- und Script-Injection, ADR unter docs/adr/ und Reflexion in AI_INTEGRATION.md.",
       "mode": "group",
       "autograder": "default",
       "feedback_pr": true,
