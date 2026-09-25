@@ -347,6 +347,13 @@
         "repo": "praxis-day10",
         "branch": "main"
       },
+      "available_from": "2026-09-25T15:30:00Z",
+      "available_from_meta": {
+        "input": "2026-09-25T17:30:00",
+        "zone": "Europe/Zurich",
+        "offset": "+02:00",
+        "source": "auto-detected"
+      },
       "max_group_size": 5
     }
   ]
