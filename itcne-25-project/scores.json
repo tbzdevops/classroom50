@@ -439,8 +439,14 @@
     "tag-10-praxis-monitoring": {
       "type": "group",
       "entries": [],
-      "collected_at": "2026-09-25T17:15:54Z",
+      "collected_at": "2026-09-25T17:23:54Z",
       "detected": [
+        {
+          "owner": "Haisbsaifi",
+          "count": 1,
+          "latest_datetime": "2026-09-25T17:17:28Z",
+          "kind": "commit"
+        },
         {
           "owner": "hasanidrizi",
           "count": 1,
