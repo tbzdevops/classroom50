@@ -332,6 +332,22 @@
         "source": "auto-detected"
       },
       "max_group_size": 3
+    },
+    {
+      "slug": "tag-10-praxis-monitoring",
+      "name": "Tag 10 Praxis - Monitoring",
+      "mode": "group",
+      "autograder": "default",
+      "feedback_pr": true,
+      "no_autograder": true,
+      "copy_about": true,
+      "copy_topics": true,
+      "template": {
+        "owner": "tbzdevops",
+        "repo": "praxis-day10",
+        "branch": "main"
+      },
+      "max_group_size": 5
     }
   ]
 }
