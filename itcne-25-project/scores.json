@@ -147,12 +147,288 @@
           ]
         }
       ],
-      "collected_at": "2026-08-20T15:37:31Z"
+      "collected_at": "2026-09-25T14:34:38Z",
+      "detected": []
     },
     "project": {
       "type": "group",
       "entries": [],
       "collected_at": "2026-08-20T04:56:06Z"
+    },
+    "tag04-praxis": {
+      "type": "group",
+      "entries": [],
+      "collected_at": "2026-09-25T14:34:38Z",
+      "detected": [
+        {
+          "owner": "Haisbsaifi",
+          "count": 18,
+          "latest_datetime": "2026-09-04T18:04:34Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "hasanidrizi",
+          "count": 12,
+          "latest_datetime": "2026-09-04T17:37:59Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "jakovljevicnikola",
+          "count": 22,
+          "latest_datetime": "2026-09-16T06:26:33Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "jasmin-idrizi",
+          "count": 2,
+          "latest_datetime": "2026-09-04T18:08:52Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "JJotace",
+          "count": 8,
+          "latest_datetime": "2026-09-09T08:02:15Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "mamo1994",
+          "count": 10,
+          "latest_datetime": "2026-09-04T17:37:09Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "marlob03",
+          "count": 3,
+          "latest_datetime": "2026-09-23T06:55:40Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "patrickmorgeneggtbz",
+          "count": 8,
+          "latest_datetime": "2026-08-25T14:37:56Z",
+          "kind": "commit"
+        }
+      ]
+    },
+    "tag05-praxis": {
+      "type": "group",
+      "entries": [],
+      "collected_at": "2026-09-25T14:34:38Z",
+      "detected": [
+        {
+          "owner": "Haisbsaifi",
+          "count": 30,
+          "latest_datetime": "2026-09-09T11:11:34Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "hasanidrizi",
+          "count": 12,
+          "latest_datetime": "2026-09-09T08:45:31Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "JJotace",
+          "count": 11,
+          "latest_datetime": "2026-09-09T08:38:05Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "lusaegesser",
+          "count": 33,
+          "latest_datetime": "2026-09-09T12:04:47Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "marlob03",
+          "count": 27,
+          "latest_datetime": "2026-09-23T07:35:48Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "patrickmorgeneggtbz",
+          "count": 18,
+          "latest_datetime": "2026-09-08T19:10:58Z",
+          "kind": "commit"
+        }
+      ]
+    },
+    "tag12-praxis": {
+      "type": "group",
+      "entries": [],
+      "collected_at": "2026-09-25T14:34:38Z",
+      "detected": []
+    },
+    "tag13-praxis": {
+      "type": "group",
+      "entries": [],
+      "collected_at": "2026-09-25T14:34:38Z",
+      "detected": []
+    },
+    "tag14-praxis": {
+      "type": "group",
+      "entries": [],
+      "collected_at": "2026-09-25T14:34:38Z",
+      "detected": []
+    },
+    "tag15-praxis": {
+      "type": "group",
+      "entries": [],
+      "collected_at": "2026-09-25T14:34:38Z",
+      "detected": []
+    },
+    "day12": {
+      "type": "group",
+      "entries": [],
+      "collected_at": "2026-09-25T14:34:38Z",
+      "detected": []
+    },
+    "day13": {
+      "type": "group",
+      "entries": [],
+      "collected_at": "2026-09-25T14:34:38Z",
+      "detected": []
+    },
+    "day14": {
+      "type": "group",
+      "entries": [],
+      "collected_at": "2026-09-25T14:34:38Z",
+      "detected": []
+    },
+    "day15": {
+      "type": "group",
+      "entries": [],
+      "collected_at": "2026-09-25T14:34:38Z",
+      "detected": []
+    },
+    "tag-06-praxis-artifacts": {
+      "type": "group",
+      "entries": [],
+      "collected_at": "2026-09-25T14:34:38Z",
+      "detected": [
+        {
+          "owner": "Haisbsaifi",
+          "count": 4,
+          "latest_datetime": "2026-09-11T18:06:47Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "hasanidrizi",
+          "count": 2,
+          "latest_datetime": "2026-09-11T18:13:44Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "jakovljevicnikola",
+          "count": 4,
+          "latest_datetime": "2026-09-11T18:22:30Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "jasmin-idrizi",
+          "count": 2,
+          "latest_datetime": "2026-09-11T17:59:09Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "JJotace",
+          "count": 4,
+          "latest_datetime": "2026-09-15T09:09:34Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "mamo1994",
+          "count": 2,
+          "latest_datetime": "2026-09-11T17:25:08Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "marlob03",
+          "count": 2,
+          "latest_datetime": "2026-09-23T07:51:13Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "tpangri",
+          "count": 4,
+          "latest_datetime": "2026-09-11T17:49:49Z",
+          "kind": "commit"
+        }
+      ]
+    },
+    "tag-07-praxis-sonarqube": {
+      "type": "individual",
+      "entries": [],
+      "collected_at": "2026-09-25T14:34:38Z",
+      "detected": [
+        {
+          "owner": "hasanidrizi",
+          "count": 4,
+          "latest_datetime": "2026-09-16T09:15:00Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "jakovljevicnikola",
+          "count": 3,
+          "latest_datetime": "2026-09-16T09:19:21Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "lusaegesser",
+          "count": 3,
+          "latest_datetime": "2026-09-16T10:56:59Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "mamo1994",
+          "count": 2,
+          "latest_datetime": "2026-09-16T08:54:17Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "marlob03",
+          "count": 4,
+          "latest_datetime": "2026-09-16T09:18:03Z",
+          "kind": "commit"
+        }
+      ]
+    },
+    "tag-08-praxis-continuous-deployment": {
+      "type": "group",
+      "entries": [],
+      "collected_at": "2026-09-25T14:34:38Z",
+      "detected": [
+        {
+          "owner": "Haisbsaifi",
+          "count": 9,
+          "latest_datetime": "2026-09-23T12:46:04Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "jasmin-idrizi",
+          "count": 1,
+          "latest_datetime": "2026-09-18T17:30:08Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "marlob03",
+          "count": 5,
+          "latest_datetime": "2026-09-23T08:05:13Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "MilosMiki5",
+          "count": 2,
+          "latest_datetime": "2026-09-23T08:28:46Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "robinkiefer2001",
+          "count": 1,
+          "latest_datetime": "2026-09-18T17:16:02Z",
+          "kind": "commit"
+        }
+      ]
     }
   }
 }
