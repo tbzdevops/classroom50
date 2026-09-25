@@ -429,6 +429,43 @@
           "kind": "commit"
         }
       ]
+    },
+    "tag-10-praxis-monitoring": {
+      "type": "group",
+      "entries": [],
+      "collected_at": "2026-09-25T16:42:04Z",
+      "detected": [
+        {
+          "owner": "hasanidrizi",
+          "count": 1,
+          "latest_datetime": "2026-09-25T16:28:48Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "jakovljevicnikola",
+          "count": 1,
+          "latest_datetime": "2026-09-25T16:21:45Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "jasmin-idrizi",
+          "count": 1,
+          "latest_datetime": "2026-09-25T16:21:14Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "mamo1994",
+          "count": 1,
+          "latest_datetime": "2026-09-25T16:24:07Z",
+          "kind": "commit"
+        },
+        {
+          "owner": "marlob03",
+          "count": 1,
+          "latest_datetime": "2026-09-25T16:34:13Z",
+          "kind": "commit"
+        }
+      ]
     }
   }
 }
