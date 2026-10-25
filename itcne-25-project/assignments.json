@@ -99,8 +99,8 @@
     },
     {
       "slug": "tag14-praxis",
-      "name": "Tag 14 Praxis — Container-Automatisierung",
-      "description": "Praxis-Übungen zu Tag 14: CI-Build für Container, Image-Push zu AWS ECR und Continuous Deployment auf AWS ECS.",
+      "name": "Tag 14 Praxis — Automatisierter Container-Build",
+      "description": "Praxis-Übung zu Tag 14: CI-Pipeline mit GitHub Actions, die bei jedem Push das Container-Image baut und den Container per HTTP testet. Registry-Push und Deployment folgen im Projekt.",
       "mode": "group",
       "autograder": "default",
       "feedback_pr": true,
@@ -223,7 +223,7 @@
     {
       "slug": "day14",
       "name": "Tag 14 Projekt — Container Teil 2",
-      "description": "Startpunkt: Stand nach Tag 13. Baue die Deployment-Pipeline: Container-Image bauen, in die Registry (ECR) pushen, mit AWS-Credentials aus GitHub Secrets deployen und die Pipeline in DEPLOYMENT.md dokumentieren.",
+      "description": "Startpunkt: Stand von day_13_solution, oder ihr übernehmt euer eigenes Projekt nach Tag 13. Pipeline: Tests → Image mit Commit-SHA nach AWS ECR → Deployment mit Docker Compose auf AWS EC2; Dokumentation in DEPLOYMENT.md.",
       "mode": "group",
       "autograder": "default",
       "feedback_pr": true,
