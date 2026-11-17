@@ -124,8 +124,8 @@
     {
       "slug": "tag15-praxis",
       "name": "Tag 15 Praxis — DevSecOps",
-      "description": "Praxis-Übungen zu Tag 15: statische Analyse mit Snyk (SAST/SCA), dynamischer Test mit OWASP ZAP (DAST) an der DSVPWA-App und die Automatisierung beider Scans in GitHub Actions.",
-      "mode": "group",
+      "description": "Praxis-Übung zu Tag 15 (Einzelarbeit): statische Analyse mit Snyk (SCA/SAST) und dynamischer Test mit OWASP ZAP (DAST) lokal an der DSVPWA-App, SQL-Injection von Hand verifizieren und Ergebnisse in findings.md festhalten.",
+      "mode": "individual",
       "autograder": "default",
       "feedback_pr": true,
       "no_autograder": true,
@@ -142,8 +142,7 @@
         "zone": "Europe/Zurich",
         "offset": "+02:00",
         "source": "auto-detected"
-      },
-      "max_group_size": 3
+      }
     },
     {
       "slug": "day04",
@@ -248,7 +247,7 @@
     {
       "slug": "day15",
       "name": "Tag 15 Projekt — DevSecOps",
-      "description": "Startpunkt: Stand nach Tag 14. Baue eine Security-Pipeline (.github/workflows/security-pipeline.yml) mit Snyk (SCA/SAST), Severity-Threshold und SARIF-Upload zu GitHub Code Scanning und dokumentiere die Findings in SECURITY.md.",
+      "description": "Startpunkt: Stand von day_14_solution, oder ihr übernehmt euer eigenes Projekt nach Tag 14. Security-Pipeline mit Snyk: security.yml (SCA/SAST, Severity-Threshold high, SARIF), container-scan.yml (Container-Scan, Base-Image aktualisieren), Gate-Beweis mit rotem Pull-Request und Kunden-Pitch in PITCH.md.",
       "mode": "group",
       "autograder": "default",
       "feedback_pr": true,
@@ -267,7 +266,7 @@
         "offset": "+02:00",
         "source": "auto-detected"
       },
-      "max_group_size": 3,
+      "max_group_size": 4,
       "locked": true
     },
     {
