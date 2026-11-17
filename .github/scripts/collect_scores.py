@@ -79,6 +79,10 @@ RESULT_SCHEMA_V1 = "classroom50/result/v1"
 # (created by autograde-runner.yaml on push to the repo's default branch).
 SUBMIT_TAG_PREFIX = "submit/"
 
+# The login GitHub gives a workflow's GITHUB_TOKEN; see release_provenance_problem.
+# Hand-mirrored from Go contract.AutogradeReleaseAuthor (parity-tested).
+AUTOGRADE_RELEASE_AUTHOR = "github-actions[bot]"
+
 # Repo permission the collect-time grant gives each staff role's team on every
 # student assignment repo. Hand-mirrored from Go StaffTeamRepoPermissions
 # (source of truth; parity-tested); keep in lockstep. Both non-owner staff teams
@@ -956,11 +960,8 @@ def is_empty_repo(entry: dict[str, Any]) -> bool:
 
 def is_no_autograder(entry: dict[str, Any]) -> bool:
     """True only when no_autograder is the boolean `true` (strict, like
-    is_empty_repo). A no_autograder assignment commits no shim, so it
-    never autogrades and produces no submit/* releases: regrade skips it and
-    collection detects its submissions from repo state, exactly like empty_repo.
-    Keep byte-identical across collect/regrade and the autograde-runner read
-    step so every tool agrees."""
+    is_empty_repo). Keep byte-identical across collect/regrade and the
+    autograde-runner read step so every tool agrees."""
     return entry.get("no_autograder") is True
 
 
@@ -1192,6 +1193,11 @@ class SubmissionDetector:
         raw_tags = entry.get("submission_tags")
         self._tags = [t for t in (raw_tags or []) if isinstance(t, str) and t]
         self._due = due
+        # An initialized repo's root commit is the seed, never a submission, so
+        # it anchors the baseline when no marker does (a no_autograder accept,
+        # or the window between turning the autograder on and the backfill). A
+        # bare empty_repo has no seed: its root commit is student work.
+        self._root_is_baseline = not is_empty_repo(entry)
 
     def detect(self, username: str, repo_name: str) -> tuple[dict[str, Any] | None, bool]:
         facts = (
@@ -1206,6 +1212,7 @@ class SubmissionDetector:
                 self._mode,
                 self._tags,
                 facts=facts,
+                root_is_baseline=self._root_is_baseline,
             )
         except urllib.error.HTTPError as exc:
             if classify(exc) is not SKIPPABLE:
@@ -1355,7 +1362,9 @@ def collect_release_history(
                 f"skipping that submission"
             )
             continue
-        except (json.JSONDecodeError, ValueError) as exc:
+        except (json.JSONDecodeError, ValueError, RecursionError) as exc:
+            # RecursionError: json.loads on a deeply nested asset; one hostile
+            # release must skip, not abort the run.
             emit_warning(
                 f"{org}/{repo_name}: result.json malformed for "
                 f"{release.get('tag_name')!r} ({exc}); skipping that submission"
@@ -1390,6 +1399,17 @@ def collect_release_history(
                 f"{org}/{repo_name}: result.json datetime = "
                 f"{candidate.get('datetime')!r} is not an RFC 3339 timestamp; "
                 f"cannot mark lateness"
+            )
+        # Judged from the release metadata, never the payload: strip any copy a
+        # hand-written result.json carries. See release_provenance_problem.
+        candidate.pop("provenance_warning", None)
+        problem = release_provenance_problem(release)
+        if problem is not None:
+            candidate["provenance_warning"] = problem
+            emit_warning(
+                f"{org}/{repo_name}: release {release.get('tag_name')!r} was {problem}; "
+                f"collected and marked in scores.json. Check the repository's "
+                f"Releases tab and Actions history."
             )
         # The stored record is the validated payload minus the bucket-key
         # `assignment`. Keeps result/v1 shape: owner + assignment_type +
@@ -2878,7 +2898,8 @@ def validate_result(
     """Raise ValueError if the payload fails the v1 contract. The
     classroom/assignment/owner checks defend against a hostile result.json
     trying to land in someone else's scores.json: the triple must match the
-    source repo's expected identity.
+    source repo's expected identity. Who published the release is a separate
+    judgment; see release_provenance_problem.
 
     `owner` (repo owner, the identity anchor) must equal `expected_username`
     (the roster/repo-name-derived owner; for a team assignment the repo-name
@@ -3016,14 +3037,21 @@ def _repo_url(api_url: str, owner: str, repo: str) -> str:
 # a divergence makes the assignments list and the submissions page disagree.
 
 # The commit subjects the tool itself authors onto a student's default branch
-# (accept's Feedback-PR commit and the submission-mode shim retrofit). Neither is
-# student work, so neither counts as a submission. Hand-mirrored with
-# cli/shared/contract's PrefixCommit forms and the web's TOOL_COMMIT_SUBJECTS.
+# (accept's Feedback-PR commit, the submission-mode shim retrofit, and the shim
+# backfill after the built-in autograder is turned on). None is student work, so
+# none counts as a submission. Hand-mirrored with cli/shared/contract's
+# PrefixCommit forms and the web's TOOL_COMMIT_SUBJECTS.
+#
+# Also the one subject the baseline rule reads (see marker_baseline). Mirrors
+# contract.ShimBackfillCommitSubject and the runner.py / regrade_repos.py
+# constant of the same name; keep byte-identical.
+SHIM_BACKFILL_COMMIT_SUBJECT = "[Classroom 50] Add autograde workflow (enable-autograder)"
 TOOL_COMMIT_SUBJECTS = frozenset(
     {
         "[Classroom 50] Open Feedback PR (gh student accept)",
         "[Classroom 50] Update autograder trigger to every-push (submission-mode)",
         "[Classroom 50] Update autograder trigger to tag (submission-mode)",
+        SHIM_BACKFILL_COMMIT_SUBJECT,
     }
 )
 
@@ -3045,6 +3073,28 @@ def commit_subject(message: Any) -> str:
     if not isinstance(message, str):
         return ""
     return message.split("\n", 1)[0].strip()
+
+
+def is_shim_backfill_commit(message: Any) -> bool:
+    """Whether a commit is the enable-autograder backfill's: subject compared
+    exactly after trimming, body ignored. Mirrors contract.IsShimBackfillCommit
+    and the web isShimBackfillCommit."""
+    return commit_subject(message) == SHIM_BACKFILL_COMMIT_SUBJECT
+
+
+def resolve_baseline_source(marker: tuple[str | None, bool], root_is_baseline: bool) -> str:
+    """Which commit anchors a repo's baseline, from marker_baseline's verdict:
+    "marker" (the oldest commit touching .classroom50.yaml), "root" (the
+    branch's root commit: the marker was backfilled, or there is none and the
+    shape says the root is the seed), or "none". The one rule every reader
+    shares; pinned across Go, the web and these scripts by
+    cli/shared/testdata/baseline_source_cases.json."""
+    sha, backfilled = marker
+    if sha is not None:
+        return "marker"
+    if backfilled or root_is_baseline:
+        return "root"
+    return "none"
 
 
 def submit_tag_datetime(tag_name: str) -> str | None:
@@ -3232,24 +3282,33 @@ def list_default_branch_commits(
     )
 
 
-def oldest_commit_sha_for_path(
-    api_url: str, owner: str, repo: str, path: str, token: str
-) -> str | None:
-    """The oldest commit touching a path, the accept-marker baseline. None when
-    the path has no history (a bare repo), which trims nothing."""
+def marker_baseline(
+    api_url: str, owner: str, repo: str, token: str
+) -> tuple[str | None, bool]:
+    """The accept-marker baseline: (sha, backfilled). sha is the oldest commit
+    touching the marker, None when none does (a bare or no_autograder repo).
+    backfilled is True when that oldest commit is the enable-autograder
+    backfill: the repo was accepted without a marker, so the caller must use
+    the root commit instead of moving the baseline onto the backfill."""
     commits = _paginate_objects(
         lambda page: (
             f"{_repo_url(api_url, owner, repo)}/commits"
-            f"?path={urllib.parse.quote(path, safe='')}&per_page=100&page={page}"
+            f"?path={urllib.parse.quote(ACCEPT_MARKER_PATH, safe='')}&per_page=100&page={page}"
         ),
         api_url,
         token,
         f"{owner}/{repo} marker history",
     )
     if not commits:
-        return None
-    sha = commits[-1].get("sha")
-    return sha if isinstance(sha, str) and sha else None
+        return None, False
+    oldest = commits[-1]
+    sha = oldest.get("sha")
+    if not isinstance(sha, str) or not sha:
+        return None, False
+    message = (oldest.get("commit") or {}).get("message")
+    if is_shim_backfill_commit(message):
+        return None, True
+    return sha, False
 
 
 def list_repo_tags(
@@ -3274,6 +3333,7 @@ def detect_repo_submissions(
     mode: str,
     submission_tags: list[str],
     facts: RepoFacts | None = None,
+    root_is_baseline: bool = False,
 ) -> list[dict[str, Any]]:
     """One repo's detected submissions. Branch mode reads the default branch, its
     accept-marker baseline and its commit log; tag mode reads its tags. Returns
@@ -3282,7 +3342,11 @@ def detect_repo_submissions(
     `facts` is what the org listing already said about the repo (RepoIndex): a
     known default branch spares the GET /repos read that only existed to learn
     it. A commitless repo is learned from the read itself (409), never from the
-    listing's lagging `size`, at the cost of one request per bare repo."""
+    listing's lagging `size`, at the cost of one request per bare repo.
+
+    `root_is_baseline`: the root commit is the seed, not a submission, so it
+    anchors the baseline when no marker does; off only for a bare empty_repo.
+    Marker vs root is decided by resolve_baseline_source."""
     try:
         if mode == "tag":
             tags = list_repo_tags(api_url, org, repo_name, token)
@@ -3295,12 +3359,15 @@ def detect_repo_submissions(
             branch = (info or {}).get("default_branch")
         if not isinstance(branch, str) or not branch:
             return []  # not accepted
-        baseline = oldest_commit_sha_for_path(
-            api_url, org, repo_name, ACCEPT_MARKER_PATH, token
-        )
+        marker = marker_baseline(api_url, org, repo_name, token)
+        baseline = marker[0]
         commits = list_default_branch_commits(
             api_url, org, repo_name, branch, token, stop_at_sha=baseline
         )
+        if resolve_baseline_source(marker, root_is_baseline) == "root" and commits:
+            # Newest first, so the walk (unbounded without a marker) ends on
+            # the root commit.
+            baseline = commits[-1].get("sha")
     except urllib.error.HTTPError as exc:
         # 409 "Git Repository is empty": a bare repo nobody has pushed to yet,
         # so "no submissions" rather than a failed read.
@@ -3350,14 +3417,51 @@ def detected_record(
     return record
 
 
+def _login(user: Any) -> str:
+    """A GitHub user object's login, or "" when the object or login is absent."""
+    if isinstance(user, dict) and isinstance(user.get("login"), str):
+        return user["login"]
+    return ""
+
+
+def _is_result_asset(asset: dict[str, Any]) -> bool:
+    """The release asset that carries the score, matched case-insensitively."""
+    return (asset.get("name") or "").lower() == RESULT_ASSET_NAME
+
+
+def release_provenance_problem(release: dict[str, Any]) -> str | None:
+    """Why a submit/* release did not come from the autograde workflow, or None.
+
+    Students can write to their repos, so they can publish a release or replace
+    its result.json as themselves. They can't act as the workflow's
+    GITHUB_TOKEN, so the release author and every result.json uploader must be
+    that login; a missing one counts as someone else. The reason is stored on
+    the collected submission as `provenance_warning` so the teacher sees it
+    beside the score; a teacher who publishes a release by hand is marked the
+    same way. gh teacher download and the web apply the same rule."""
+    author = _login(release.get("author"))
+    if author != AUTOGRADE_RELEASE_AUTHOR:
+        return f"published by {author or 'an unknown account'!r}, not by the autograde workflow"
+    for asset in release.get("assets") or []:
+        if not isinstance(asset, dict) or not _is_result_asset(asset):
+            continue
+        uploader = _login(asset.get("uploader"))
+        if uploader != AUTOGRADE_RELEASE_AUTHOR:
+            return (
+                f"{RESULT_ASSET_NAME} uploaded by {uploader or 'an unknown account'!r}, "
+                f"not by the autograde workflow"
+            )
+    return None
+
+
 def all_submit_releases(
     api_url: str, owner: str, repo: str, token: str
 ) -> list[dict[str, Any]]:
     """Every submit-tag release for a repo, newest first, walking the full
     /releases pagination: the complete submission history (a student who pushed
-    N times has N submit/* releases, all returned). Non-submit releases (e.g., a
-    hand-created tag) are filtered out. A 404 (no releases, or repo not
-    accepted) yields an empty list.
+    N times has N submit/* releases, all returned). Non-submit releases (a
+    hand-created tag) are filtered out. A 404 (no releases, or repo not accepted)
+    yields an empty list.
 
     Pagination is _paginate_objects', so an incompletable walk (looping Link
     chain or the page cap) raises IncompleteListing rather than returning a
@@ -3935,7 +4039,7 @@ def download_result_asset(
     """
     matches = [
         c for c in (release.get("assets") or [])
-        if (c.get("name") or "").lower() == RESULT_ASSET_NAME
+        if _is_result_asset(c)
     ]
     # Runs once per release in the history walk, so errors name THIS release.
     release_label = release.get("tag_name") or release.get("url") or "release"
